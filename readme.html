@@ -1,0 +1,52 @@
+<h1 id="gip">Gip</h1>
+<p><code>gip</code> is a set of wrapper scripts around PsN that will allow you to distribute and synchronize models and results between your local computer and remote servers.</p>
+<h2 id="the-problem-that-gip-solves">The problem that <code>gip</code> solves</h2>
+<p>Many modelers find it a pain to constantly move files between the local computer and a cluster or a cloud server. Modeling only on a local computer is usually not an option due to limited CPU capacity. On the other hand, modeling only in the cloud is not always considered convenient either: although some excellent cloud tools are available (like RStudio Server, PiranaJS), many modelers find it more convenient to parse results and datasets on their local machine. Also, cluster administrators may not allow installation of specific custom tools or libraries, and modeling on a cluster always requires a connection to the internet. <code>gip</code> solves these problems by performing 'on-the-fly' transfer of models and results between your local computer and the cloud / cluster. At the same time it provides automatic backup and version control of your work in the cloud.</p>
+<h2 id="the-mechanism">The mechanism</h2>
+<p><code>gip</code> is called from the console on your local machine, followed by a location indicator, and the PsN command you want to execute:</p>
+<pre><code>gip [location] [PsN command]</code></pre>
+<p>The location indicator specifies where you want to run the PsN command. With every call to <code>gip</code>, your model and results are first saved to the local Git repository and synchronized to the cloud (<code>commit</code> + <code>push</code>), before any run is started. If the location indicator is not <code>local</code>, then <code>gip</code> will login to the specified server, lookup the project folder you are working in locally, and synchronize to the latest version of your models (<code>git pull</code>). Afer that it will start the actual PsN command on the server, and return to your local console. With the <code>status</code> and <code>sync</code> commands you can check run progress and synchronize results between your local computer and your server(s).</p>
+<h2 id="some-example-commands">Some example commands</h2>
+<pre><code># run the model locally 
+# (same as &#39;execute run1.mod&#39;, but first saves/syncs changes)
+gip local execute run1.mod    
+
+# &#39;local&#39; may be dropped, as it is default
+gip execute run1.mod    
+
+# Run the same model but now on the &#39;serv1&#39; cluster
+gip serv1 execute run1.mod 
+
+# Check if any results are available on any of the specified servers
+gip status
+
+# Check if any results are available on server &#39;serv1&#39;
+gip status serv1
+
+# Look for new models/results on all servers, and synchronize
+gip sync
+
+# Look for new models/results on &#39;serv1&#39; and synchronize 
+gip sync serv1
+
+# Set up the git repository on your local machine, as well as
+# on all specified servers
+gip init 
+gip sync</code></pre>
+<h2 id="advantages-use-cases">Advantages / use cases</h2>
+<ul>
+<li>Run your simple models locally, dispatch heavier computations to a cluster</li>
+<li>Run models locally when not connected to the internet, and work in the cloud when you are</li>
+<li>Always have a backup in the cloud</li>
+<li>Automatic version control on all models and results</li>
+<li>No wait when cluster is down, just sync your project to a different cloud/cluster</li>
+<li>Easily share projects with colleagues</li>
+<li>Integrates with Pirana and PiranaJS</li>
+</ul>
+<h2 id="requirements">Requirements</h2>
+<ul>
+<li>PsN, NONMEM, and <code>gip</code> and <code>git</code> need to be installed both locally and on the servers.</li>
+<li>GitHub account or custom Git server account</li>
+</ul>
+<h2 id="license">License</h2>
+<p><code>gip</code> is currently in the &quot;idea&quot;-stage, but will eventually be released under the open source MIT license.</p>
