@@ -136,11 +136,11 @@ if ($gim_cmd ne "") {
         git_pull ($r, $as_remote);
         git_add_commit ($r, $as_remote);
         my $status = git_get_status($r, $as_remote);
-        if ($status =~ m/to be committed/) {
+        #if ($status =~ m/to be committed/) {
             git_push ($r, $as_remote);
-        } else {
-            msg("nothing to push", $as_remote);
-        }
+        #} else {
+        #    msg("nothing to push", $as_remote);
+        #}
         my $server_id = shift(@all_args);
         if ($server_id ne "") {
             msg("connecting to ".$server_id, $as_remote);
@@ -158,6 +158,12 @@ if ($gim_cmd ne "") {
                 print $line;
             }
             $gim_cmd = "";
+        }
+        if ($as_remote == 1) {
+            exit;
+        } else {
+            git_pull ($r, $as_remote);
+            exit;
         }
     }
     if ($gim_cmd eq "link") {
@@ -206,7 +212,7 @@ if ($gim_cmd eq "") {
 #         if ($status =~ m/to be committed/) {
                 git_push ($r, $as_remote);
  #        } else {
-            msg("nothing to push", $as_remote);
+ #           msg("nothing to push", $as_remote);
  #        }
     }
 
