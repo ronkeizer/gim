@@ -133,7 +133,7 @@ if ($gim_cmd ne "") {
         }
     }
     if ($gim_cmd eq "as_remote") { # received a request to run a model as remote server
-#        my $folder = shift(@all_args);
+        # my $repo = shift(@all_args);
 #        chdir($folder);
         $local = 1;
         $gim_cmd = ""; # make sure the psn cmd is run
@@ -156,8 +156,15 @@ if ($gim_cmd eq "") {
     ## add files to the repo if new results available
     my $origin = git_get_origin ($r);
     if ($origin -> {origin} eq "") {
-        msg("no remote repository specified yet for this project. Please use 'gim link [repo]'",$as_remote );
-        exit;
+        if ($as_remote) {
+            my $folder = fastgetcwd();
+            my @dirs = split(/\//, $folder);
+            my $repo_id = pop(@dirs);
+            git_add_origin($r, $git_remote, $repo_id);
+        } else {
+            msg("no remote repository specified yet for this project. Please use 'gim link [repo]'",$as_remote );
+            exit;
+        }
     }
     my $repo = extract_repo_id_from_url ($origin -> {origin});
 
