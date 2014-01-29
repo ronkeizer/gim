@@ -124,7 +124,7 @@ if ($gim_cmd ne "") {
         # my $repo = shift(@all_args);
 #        chdir($folder);
         $local = 1;
-        if (@all_args[0] ~~ ("sync", "status") ) {
+        if (( @all_args[0] eq "sync")||(@all_args[0] eq "status") ) {
             $gim_cmd = shift(@all_args); 
         } else {
             $gim_cmd = ""; # make sure the psn cmd is run
@@ -169,15 +169,6 @@ if ($gim_cmd ne "") {
         if ($serv eq "all") {
             @servers_loop = @servers;
         }
-#        msg("Looking for unsaved changes in current folder...",$as_remote );
-        # git_pull ($r, $as_remote);
-        # my $status = git_get_status($r, $as_remote);
-#        print $status;
-#        exit;
-#        if (! $status =~ /nothing to commit/) {
-         #   git_add_commit ($r, $as_remote);
-         #   git_push ($r, $as_remote);
-#        }
         foreach my $server_id (@servers_loop) {
             if ($server_id ne "") {
                 msg("connecting to ".$server_id, $as_remote);
@@ -196,12 +187,10 @@ if ($gim_cmd ne "") {
                 }
             }
         }
-        if ($as_remote == 1) {
-            exit;
-        } else {
+        if ($as_remote != 1) {
             git_pull ($r, $as_remote);
-            exit;
         }
+        exit;
     }
     if ($gim_cmd eq "link") {
         my $repo = shift(@all_args);
