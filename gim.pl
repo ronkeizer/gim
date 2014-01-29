@@ -149,7 +149,9 @@ if ($gim_cmd eq "") {
         msg("running on local machine: ".$psn_cmd."\n");
         open (OUT, $psn_cmd . "&2>1 | ");
         while (my $line = <OUT>) {
-            print $line;
+            if ($line =~ m/ITERATION/) {
+                print $line;
+            }
         }
         git_add_commit($r);
         # look at status  as well !
@@ -164,8 +166,12 @@ if ($gim_cmd eq "") {
             $ssh_cmd .= " -i ".$server -> {key};
         }
         $ssh_cmd .= " ".$server -> {user}. "@" . $server -> {url};
-        my $cmd = "mkdir test; cd test; git remote add origin ".$origin -> {origin};
-        msg ($ssh_cmd . $cmd);
+        my $cmd = '"mkdir test; cd test; git init; git remote remove origin; git remote add origin '.$origin -> {origin}.'; '.$psn_cmd.'"';
+        msg ($ssh_cmd ." ". $cmd);
+        open (OUT, $ssh_cmd ." ". $cmd . " &2>1 | ");
+        while (my $line = <OUT>) {
+            print $line;
+        }
     }
 }
 print "\n";
