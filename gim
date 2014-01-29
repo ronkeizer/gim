@@ -30,9 +30,6 @@ my $ini = read_settings($base_dir . "/settings.json");
 our @servers = keys (%{$ini -> {servers} });
 my $git_remote =  $ini -> {git}; 
 
-msg ("defined servers: ".join (" ", @servers));
-msg ("git account: ".$git_remote -> {url} .":". $git_remote -> {user});
-
 ################################################################################################
 ## Interpret what to do from command line
 ################################################################################################
@@ -46,12 +43,15 @@ my @psn_cmds = qw/execute bootstrap vpc/;
 my @all_cmd;
 #push (@all_cmd, @gim_cmd, @psn_cmd);
 my $psn_cmd; my $gim_cmd; my $local = 0; my $loc_id; my $server_id;
-my $as_remote = 0;
+my $as_remote = 0; 
 if ( $key ~~ @gim_cmds ) { # do a gim command?
     $gim_cmd = $key;
     $local = 1;
 #   msg("running gim command ".$key);
 } 
+if ($gim_cmd eq "as_remote") {
+    $as_remote = 1;
+}
 if ( $key ~~ @psn_cmds ) { # do a psn command locally ?
     $psn_cmd = $key;
 #    msg("running PsN command '".$psn_cmd."' on local machine.");
@@ -59,12 +59,12 @@ if ( $key ~~ @psn_cmds ) { # do a psn command locally ?
 } 
 if ( $key ~~ @servers ) { # do a psn command locally ?
     $server_id = $key;
-    msg("running on server (".$server_id.")");
+    msg("running on server (".$server_id.")", $as_remote );
     $local = 0;
 } 
 if (!(($key ~~ @gim_cmds )||($key ~~ @psn_cmds)||($key ~~ @servers))) { # not a recognized command
     my $par = shift(@all_args);
-    msg("[error] '".$par."' is not a recognized gip or psn command, nor a defined cluster.");
+    msg("[error] '".$par."' is not a recognized gip or psn command, nor a defined cluster.", $as_remote);
     exit;
 }
 
@@ -76,13 +76,20 @@ unless ($local) {
 }
 
 ################################################################################################
+## Print some info
+################################################################################################
+
+msg ("defined servers: ".join (" ", @servers), $as_remote);
+msg ("git account: ".$git_remote -> {url} .":". $git_remote -> {user}, $as_remote);
+
+################################################################################################
 ## Initialize Git repo, save changes if necessary, push to remote
 ################################################################################################
 
 our $cwd = ".";
 my $dir = $cwd;
 unless (-d $dir."/.git") {
-    msg ("creating new git repository in current folder.");
+    msg ("creating new git repository in current folder.",$as_remote );
     Git::Repository -> run( 
         init => $dir,
         { 
@@ -100,7 +107,7 @@ our $r = Git::Repository -> new(
             },
         } );
 if ($r =~ m/HASH/) {
-    msg("loaded git repository in current folder.");
+    msg("loaded git repository in current folder.",$as_remote );
 }
 # print join(" ",keys(%$r))."\n";
 # print "* gim: Options: ".join(" ",keys(%{$r -> {options}}));
@@ -112,7 +119,7 @@ if ($r =~ m/HASH/) {
 if ($gim_cmd ne "") {
     shift(@all_args);
     if ($gim_cmd eq "sync") {
-        msg("Looking for unsaved changes in current folder...");
+        msg("Looking for unsaved changes in current folder...",$as_remote );
         git_add_commit ($r);
     }
     if ($gim_cmd eq "link") {
@@ -121,7 +128,7 @@ if ($gim_cmd ne "") {
         unless($repo eq "") {
             git_add_origin($r, $git_remote, $repo);
         } else {
-            msg("no repo name specified.");
+            msg("no repo name specified.",$as_remote );
             exit;
         }
     }
@@ -133,7 +140,7 @@ if ($gim_cmd ne "") {
         $as_remote = 1;
     } 
     if ($gim_cmd ne "") {
-        msg("done.");
+        msg("done.",$as_remote );
         exit;
     }
 }
@@ -149,30 +156,30 @@ if ($gim_cmd eq "") {
     ## add files to the repo if new results available
     my $origin = git_get_origin ($r);
     if ($origin -> {origin} eq "") {
-        msg("no remote repository specified yet for this project. Please use 'gim link [repo]'");
+        msg("no remote repository specified yet for this project. Please use 'gim link [repo]'",$as_remote );
         exit;
     }
     my $repo = extract_repo_id_from_url ($origin -> {origin});
 
     if ($as_remote == 1) {
-        git_pull($r);
+        git_pull($r, $as_remote);
     } else {
-        git_add_commit($r);
-        git_push($r);
+        git_add_commit($r, $as_remote);
+        git_push($r, $as_remote);
     }
 
     my $psn_cmd = join (" ", @all_args);
     if ($local) {
-        msg("running on local machine: ".$psn_cmd."\n");
+        msg("running on local machine: ".$psn_cmd."\n",$as_remote );
         open (OUT, $psn_cmd . "&2>1 | ");
         while (my $line = <OUT>) {
             if ($line =~ m/ITERATION/) {
                 print $line;
             }
         }
-        git_add_commit($r);
+        git_add_commit($r, $as_remote);
         # look at status  as well !
-        git_push($r);
+        git_push($r, $as_remote);
     } 
 
     if (!$local) {
@@ -195,5 +202,5 @@ if ($gim_cmd eq "") {
     }
 }
 print "\n";
-msg("done.");
+msg("done.", $as_remote);
 exit;

@@ -31,10 +31,14 @@ sub extract_repo_id_from_url {
 }
 
 sub msg {
-   my ($msg, $v) = @_;
+   my ($msg, $as_remote) = @_;
    $msg = $msg."\n";
    my $flag = 0;
-   print colored (['green'], "gim: ");
+   if ($as_remote) {
+       print colored (['blue'], "gim remote: ");
+    } else {
+       print colored (['green'], "gim: ");
+    }
    if ($msg =~ m/\[error\]/) { 
      $msg =~ s/\[error\]//; 
      print colored (['red'], "[error]"); 
@@ -50,7 +54,7 @@ sub msg {
 
 ## add files and commit to the repo
 sub git_add_commit {
-    my $r = shift;
+    my ($r, $as_remote) = @_;
     my @cmd = ("add", ".");
     my $output = $r -> run (@cmd);
     my $host = hostname;
@@ -60,19 +64,19 @@ sub git_add_commit {
     my @cmd = ("commit", "-a", "-m '".$m."'");
     my $output = $r -> run (@cmd);
     if ($output =~ m/nothing to commit/) {
-        msg("no new files or changes found");
+        msg("no new files or changes found", $as_remote);
        return(0);
      } else {
         my $n_add =()= $output =~ /create mode/gi;
         if ($n_add > 0) {
-          msg("git added ".$n_add." files to repository (".$m.")");
+          msg("git added ".$n_add." files to repository (".$m.")", $as_remote);
         }
         return(1);
     }
 }
 
 sub git_get_origin {
-    my $r = shift;
+    my ($r, $as_remote) = @_;
     my @cmd = ("remote", "-v");
     my $output = $r -> run (@cmd);
 #    $output =~ s/\t/\s/g;
@@ -121,9 +125,9 @@ sub git_add_origin {
 }
 
 sub git_push {
-    my $r = shift;
+    my ($r, $as_remote) = @_;
     my $origin = git_get_origin ($r);
-    msg("pushing files to cloud (".$origin -> {origin}.")");
+    msg("pushing files to cloud (".$origin -> {origin}.")", $as_remote);
     my $options = { "fatal" => [ -128 ] };    #    quiet => true };
     my @cmd = ("push", "-u", "origin", "master", $options);
     my ($stdout, $stderr, @result) = capture {
@@ -134,22 +138,22 @@ sub git_push {
         my @errors = ("could not resolve hostname");            
         foreach my $err (@errors) {
             if ($stderr =~ m/$err/i) {
-               msg("[warning] pushing files to remote failed: ".$err);
+               msg("[warning] pushing files to remote failed: ".$err, $as_remote);
                $known_err = 1;
             }           
         }
         if ($known_err == 0) {
             my $flag_done = 0;
             if ($stderr =~ m/^Everything up-to-date/) {
-                msg("everything up-to-date");              
+                msg("everything up-to-date", $as_remote);              
                 $flag_done = 1;
             } 
             if ($stderr =~ m/^To /) {
-                msg("updates pushed to remote");              
+                msg("updates pushed to remote", $as_remote);              
                 $flag_done = 1;
             } 
             if ($flag_done == 0) {
-                msg("[warning] pushing files failed: unknown error");
+                msg("[warning] pushing files failed: unknown error", $as_remote);
                 print $stderr;
                 exit;
             }
@@ -159,9 +163,9 @@ sub git_push {
 }
 
 sub git_pull {
-    my $r = shift;
+    my ($r, $as_remote) = @_;
     my $origin = git_get_origin ($r);
-    msg("pulling files (".$origin -> {origin}.")");
+    msg("pulling files (".$origin -> {origin}.")", $as_remote);
     my $options = { "fatal" => [ -128 ] };    #    quiet => true };
     my @cmd = ("pull", "origin", "master");
     my ($stdout, $stderr, @result) = capture {
