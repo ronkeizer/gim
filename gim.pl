@@ -158,13 +158,14 @@ if ($gim_cmd eq "") {
 
     if (!$local) {
         msg("running on ".$loc_id.": ".$psn_cmd);
-        my $ssh_cmd = "ssh ";
+        my $ssh_cmd = "ssh";
         my $server = $ini -> {servers} -> {$server_id};
         if ($server -> {key} ne "") {
             $ssh_cmd .= " -i ".$server -> {key};
         }
         $ssh_cmd .= " ".$server -> {user}. "@" . $server -> {url};
-        msg ($ssh_cmd);
+        my $cmd = "mkdir test; cd test; git remote add origin ".$origin -> {origin};
+        msg ($ssh_cmd . $cmd);
     }
 }
 print "\n";
