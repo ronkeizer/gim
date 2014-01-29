@@ -135,6 +135,7 @@ if ($gim_cmd ne "") {
         my $serv = shift(@all_args);
         if ($serv eq "") {
             my $status = git_get_status($r, $as_remote);
+            if ($status =~ m/nothing to commit/) {$status = "no changes found"; }
             msg($status, $as_remote);
             exit;
         } else {
