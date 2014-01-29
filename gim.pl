@@ -46,6 +46,12 @@ if ( $key ~~ @psn_cmds ) { # do a psn command locally ?
 #    msg("running PsN command '".$psn_cmd."' on local machine.");
     $local = 1;
 } 
+if (!(($key ~~ @gim_cmds )||($key ~~ @psn_cmds))) { # not a recognized command
+    my $par = shift(@all_args);
+    msg("[error] '".$par."' is not a recognized gip or psn command.");
+    exit;
+}
+
 if ($key eq "local") {
     $local = 1;
 }

@@ -12,11 +12,20 @@ our @EXPORT_OK = qw(msg git_add_commit git_get_origin git_add_origin git_push gi
 
 sub msg {
    my ($msg, $v) = @_;
-   $msg = "gim: ".$msg."\n";
+   $msg = $msg."\n";
    my $flag = 0;
-   if ($msg =~ m/\[error\]/) { print colored (['bold red'], 'bold red'); $flag = 1; };
-   if ($msg =~ m/\[warning\]/) { print colored (['bold yellow'], $msg); $flag = 1 };
-   if (!$flag) { print $msg; };
+   print "gim: ";
+   if ($msg =~ m/\[error\]/) { 
+     $msg =~ s/\[error\]//; 
+     print colored (['red'], "[error]"); 
+   };
+   if ($msg =~ m/\[warning\]/) { 
+     $msg =~ s/\[warning\]//; 
+     print colored (['yellow'], "[warning]"); 
+   };
+   #if (!$flag) { 
+    print $msg;
+   #  };
 }
 
 ## add files and commit to the repo
