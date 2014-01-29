@@ -12,7 +12,7 @@ use JSON::XS;
 require Exporter;
 
 our @ISA = qw(Exporter);
-our @EXPORT_OK = qw(read_settings extract_repo_id_from_url msg git_add_commit git_get_origin git_add_origin git_push git_pull github_form_url);
+our @EXPORT_OK = qw(read_settings extract_repo_id_from_url msg git_add_commit git_get_origin git_get_status git_add_origin git_push git_pull github_form_url);
 
 sub read_settings {
     my $file = shift;
@@ -91,6 +91,14 @@ sub git_get_origin {
     }
     return($or);       
 }
+
+sub git_get_status {
+    my ($r, $as_remote) = @_;
+    my @cmd = ("status");
+    my $output = $r -> run (@cmd);
+    return($output);
+}
+
 
 sub git_add_origin {
     my ($r, $git_remote, $repo, $flag, $as_remote) = @_;
