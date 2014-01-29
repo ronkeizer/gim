@@ -5,16 +5,30 @@ use Getopt::Std;
 use Cwd;
 use Time::Local;
 use Term::ANSIColor;
+use Sys::Hostname;
+use POSIX qw(strftime);
+use Capture::Tiny ':all';
+use JSON::XS;
 require Exporter;
 
 our @ISA = qw(Exporter);
-our @EXPORT_OK = qw(msg git_add_commit git_get_origin git_add_origin git_push github_form_url);
+our @EXPORT_OK = qw(read_settings msg git_add_commit git_get_origin git_add_origin git_push github_form_url);
+
+sub read_settings {
+    my $file = shift;
+    open (TXT, "<".$file);
+    my @lines = <TXT>;
+    close TXT;
+    my $json_text = join ("", @lines);
+    my $user = JSON::XS->new->utf8->decode ($json_text);
+    return($user);
+}
 
 sub msg {
    my ($msg, $v) = @_;
    $msg = $msg."\n";
    my $flag = 0;
-   print "gim: ";
+   print colored (['green'], "gim: ");
    if ($msg =~ m/\[error\]/) { 
      $msg =~ s/\[error\]//; 
      print colored (['red'], "[error]"); 
@@ -33,14 +47,18 @@ sub git_add_commit {
     my $r = shift;
     my @cmd = ("add", ".");
     my $output = $r -> run (@cmd);
-    my @cmd = ("commit", "-a", "-m 'test'");
+    my $host = hostname;
+    $host =~ s/\.local//;
+    my $now = strftime "%Y%m%d_%H:%M:%S", localtime;
+    my $m = $host."_".$now;
+    my @cmd = ("commit", "-a", "-m '".$m."'");
     my $output = $r -> run (@cmd);
     if ($output =~ m/nothing to commit/) {
-        msg("git reports 'nothing to commit'");
+        msg("no new files or changes found");
     } else {
         my $n_add =()= $output =~ /create mode/gi;
         if ($n_add > 0) {
-          msg("git added ".$n_add." files to repository");
+          msg("git added ".$n_add." files to repository (".$m.")");
         }
     }
 }
@@ -74,7 +92,7 @@ sub git_add_origin {
         my $new_link = github_form_url($git_remote); 
         my @cmd = ("remote", "add", "origin", $new_link);
         my $output = $r -> run (@cmd);
-        msg("linking local repository to remote repository (".$repo.")");
+        msg("linking local repository to remote (".$repo.")");
     } else {
         msg("[warning] remote origin already exists!");
         unless($flag) {
@@ -97,9 +115,39 @@ sub git_add_origin {
 sub git_push {
     my $r = shift;
     my $origin = git_get_origin ($r);
-    msg("pushing files to remote repository (".$origin -> {origin}.")...");
-    my @cmd = ("push", "-u", "origin", "master");
-    my $output = $r -> run (@cmd);
+    msg("pushing files to cloud (".$origin -> {origin}.")");
+    my $options = { "fatal" => [ -128 ] };    #    quiet => true };
+    my @cmd = ("push", "-u", "origin", "master", $options);
+    my ($stdout, $stderr, @result) = capture {
+      $output = $r -> run (@cmd);
+    };  
+    if ($stderr ne "") {
+        my $known_err = 0;
+        my @errors = ("could not resolve hostname");            
+        foreach my $err (@errors) {
+            if ($stderr =~ m/$err/i) {
+               msg("[warning] pushing files to remote failed: ".$err);
+               $known_err = 1;
+            }           
+        }
+        if ($known_err == 0) {
+            my $flag_done = 0;
+            if ($stderr =~ m/^Everything up-to-date/) {
+                msg("everything up-to-date");              
+                $flag_done = 1;
+            } 
+            if ($stderr =~ m/^To /) {
+                msg("updates pushed to remote");              
+                $flag_done = 1;
+            } 
+            if ($flag_done == 0) {
+                msg("[warning] pushing files failed: unknown error");
+                print $stderr;
+                exit;
+            }
+        }
+    }
+
     #print $output;
 }
 

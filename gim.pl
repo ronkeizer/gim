@@ -5,37 +5,46 @@ use strict;
 use Cwd qw(fastgetcwd realpath);
 use File::Basename;
 use Git::Repository;
-use Term::ANSIColor;
+use Sys::Hostname;
 
 #*** include modules in INC
 BEGIN{
    my $base_dir = &File::Basename::dirname(realpath($0));
    push (@INC, $base_dir);
 }
-use modules::gim qw(msg git_add_commit git_get_origin git_add_origin git_push github_form_url);
-
+use modules::gim qw(read_settings msg git_add_commit git_get_origin git_add_origin git_push github_form_url);
+my $base_dir = &File::Basename::dirname(realpath($0));
 my @all_args = @ARGV;
 my $key = @all_args[0];
 print "\n*** Gim version 0.1 \n";
-print "*** Jan 2014, by Ron Keizer \n\n";
+print "*** Jan 2014, RJK \n\n";
 my $git_remote = {
  "user" => "ronkeizer",
  "url" => 'git@github.com'
 };
+my $cwd = fastgetcwd();
+
+################################################################################################
+## Get user info
+################################################################################################
+
+my $ini = read_settings($base_dir . "/settings.json");
+our @servers = keys (%{$ini -> {servers} });
+msg ("defined servers: ".join (" ", @servers));
 
 ################################################################################################
 ## Interpret what to do from command line
 ################################################################################################
 
 if (@all_args == 0) {
-    msg("No arguments to gim.");
+    msg("[error] no arguments to gim.");
     exit;
 }
 my @gim_cmds = qw/init clone sync status link/;
 my @psn_cmds = qw/execute bootstrap vpc/;
 my @all_cmd;
 #push (@all_cmd, @gim_cmd, @psn_cmd);
-my $psn_cmd; my $gim_cmd; my $local = 0; my $loc_id;
+my $psn_cmd; my $gim_cmd; my $local = 0; my $loc_id; my $server_id;
 if ( $key ~~ @gim_cmds ) { # do a gim command?
     $gim_cmd = $key;
     $local = 1;
@@ -46,9 +55,14 @@ if ( $key ~~ @psn_cmds ) { # do a psn command locally ?
 #    msg("running PsN command '".$psn_cmd."' on local machine.");
     $local = 1;
 } 
-if (!(($key ~~ @gim_cmds )||($key ~~ @psn_cmds))) { # not a recognized command
+if ( $key ~~ @servers ) { # do a psn command locally ?
+    $server_id = $key;
+    msg("running on server (".$server_id.")");
+    $local = 0;
+} 
+if (!(($key ~~ @gim_cmds )||($key ~~ @psn_cmds)||($key ~~ @servers))) { # not a recognized command
     my $par = shift(@all_args);
-    msg("[error] '".$par."' is not a recognized gip or psn command.");
+    msg("[error] '".$par."' is not a recognized gip or psn command, nor a defined cluster.");
     exit;
 }
 
@@ -133,12 +147,18 @@ if ($gim_cmd eq "") {
     my $psn_cmd = join (" ", @all_args);
     if ($local) {
         msg("running on local machine: ".$psn_cmd."\n");
-        system ($psn_cmd);
+        open (OUT, $psn_cmd . "&2>1 | ");
+        while (my $line = <OUT>) {
+            print $line;
+        }
+        git_add_commit($r);
+        git_push($r);
     } 
 
     if (!$local) {
         msg("running on ".$loc_id.": ".$psn_cmd);
     }
 }
-msg("\ndone.");
+print "\n";
+msg("done.");
 exit;
