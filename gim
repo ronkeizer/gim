@@ -194,9 +194,9 @@ if ($gim_cmd ne "") {
                 while (my $line = <OUT>) {
                     print $line;
                 }
-                $gim_cmd = "";
             }
         }
+        $gim_cmd = "";
         if ($as_remote == 1) {
             exit;
         } else {
