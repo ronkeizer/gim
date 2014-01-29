@@ -135,7 +135,7 @@ if ($gim_cmd ne "") {
         my $serv = shift(@all_args);
         if ($serv eq "") {
             my $status = git_get_status($r, $as_remote);
-            msg($status);
+            msg($status, $as_remote);
             exit;
         } else {
             my @servers_loop = ($serv);
