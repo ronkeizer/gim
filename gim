@@ -182,7 +182,8 @@ if ($gim_cmd eq "") {
         # msg("running on local machine: ".$psn_cmd."\n",$as_remote );
         if ($as_remote) {
             msg("starting PsN (".$psn_cmd.")", $as_remote);
-            system ("exec ".$psn_cmd. " &2>1 >test.out &");
+	    system ('nohup nice '.$psn_cmd.' > foo.out 2> foo.err < /dev/null &');
+	    sleep (1);
         } else {
             open (OUT, $psn_cmd . "&2>1 | ");
             while (my $line = <OUT>) {
@@ -195,7 +196,6 @@ if ($gim_cmd eq "") {
             git_push($r, $as_remote);
         }
     } 
-
     if (!$local) {
 #        msg("running on ".$loc_id.": ".$psn_cmd);
         my $ssh_cmd = "ssh";
