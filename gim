@@ -196,7 +196,6 @@ if ($gim_cmd ne "") {
                 }
             }
         }
-        $gim_cmd = "";
         if ($as_remote == 1) {
             exit;
         } else {
