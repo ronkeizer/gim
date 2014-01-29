@@ -182,7 +182,7 @@ if ($gim_cmd eq "") {
         # msg("running on local machine: ".$psn_cmd."\n",$as_remote );
         if ($as_remote) {
             msg("starting PsN (".$psn_cmd.")", $as_remote);
-            system ($psn_cmd. " &2>1 >test.out &");
+            system ("exec ".$psn_cmd. " &2>1 >test.out &");
         } else {
             open (OUT, $psn_cmd . "&2>1 | ");
             while (my $line = <OUT>) {
