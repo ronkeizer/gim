@@ -12,7 +12,7 @@ use JSON::XS;
 require Exporter;
 
 our @ISA = qw(Exporter);
-our @EXPORT_OK = qw(read_settings msg git_add_commit git_get_origin git_add_origin git_push github_form_url);
+our @EXPORT_OK = qw(read_settings extract_repo_id_from_url msg git_add_commit git_get_origin git_add_origin git_push git_pull github_form_url);
 
 sub read_settings {
     my $file = shift;
@@ -22,6 +22,12 @@ sub read_settings {
     my $json_text = join ("", @lines);
     my $user = JSON::XS->new->utf8->decode ($json_text);
     return($user);
+}
+
+sub extract_repo_id_from_url {
+    my $url = shift;
+    my ($git, $repo) = split(/\//, $url);
+    return($repo);
 }
 
 sub msg {
@@ -149,8 +155,18 @@ sub git_push {
             }
         }
     }
-
     #print $output;
+}
+
+sub git_pull {
+    my $r = shift;
+    my $origin = git_get_origin ($r);
+    msg("pulling files (".$origin -> {origin}.")");
+    my $options = { "fatal" => [ -128 ] };    #    quiet => true };
+    my @cmd = ("pull", "origin", "master");
+    my ($stdout, $stderr, @result) = capture {
+      $output = $r -> run (@cmd);
+    };  
 }
 
 sub github_form_url {

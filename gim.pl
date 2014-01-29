@@ -12,16 +12,12 @@ BEGIN{
    my $base_dir = &File::Basename::dirname(realpath($0));
    push (@INC, $base_dir);
 }
-use modules::gim qw(read_settings msg git_add_commit git_get_origin git_add_origin git_push github_form_url);
+use modules::gim qw(read_settings extract_repo_id_from_url msg git_add_commit git_get_origin git_add_origin git_push git_pull github_form_url);
 my $base_dir = &File::Basename::dirname(realpath($0));
 my @all_args = @ARGV;
 my $key = @all_args[0];
 print "\n*** Gim version 0.1 \n";
 print "*** Jan 2014, RJK \n\n";
-my $git_remote = {
- "user" => "ronkeizer",
- "url" => 'git@github.com'
-};
 my $cwd = fastgetcwd();
 
 ################################################################################################
@@ -30,7 +26,10 @@ my $cwd = fastgetcwd();
 
 my $ini = read_settings($base_dir . "/settings.json");
 our @servers = keys (%{$ini -> {servers} });
+my $git_remote =  $ini -> {git}; 
+
 msg ("defined servers: ".join (" ", @servers));
+msg ("git account: ".$git_remote -> {url} .":". $git_remote -> {user});
 
 ################################################################################################
 ## Interpret what to do from command line
@@ -40,11 +39,12 @@ if (@all_args == 0) {
     msg("[error] no arguments to gim.");
     exit;
 }
-my @gim_cmds = qw/init clone sync status link/;
+my @gim_cmds = qw/init clone sync status link as_remote/;
 my @psn_cmds = qw/execute bootstrap vpc/;
 my @all_cmd;
 #push (@all_cmd, @gim_cmd, @psn_cmd);
 my $psn_cmd; my $gim_cmd; my $local = 0; my $loc_id; my $server_id;
+my $as_remote = 0;
 if ( $key ~~ @gim_cmds ) { # do a gim command?
     $gim_cmd = $key;
     $local = 1;
@@ -123,14 +123,23 @@ if ($gim_cmd ne "") {
             exit;
         }
     }
-    msg("done.");
-    exit;
+    if ($gim_cmd eq "as_remote") { # received a request to run a model as remote server
+#        my $folder = shift(@all_args);
+#        chdir($folder);
+        $local = 1;
+        $gim_cmd = ""; # make sure the psn cmd is run
+        $as_remote = 1;
+    } 
+    if ($gim_cmd ne "") {
+        msg("done.");
+        exit;
+    }
 }
 
 # origin: git@github.com:ronkeizer/test.git
 
 ################################################################################################
-## Run the PsN command, either locally or remote
+## Run the PsN command, either locally or send to remote
 ################################################################################################
 
 if ($gim_cmd eq "") {
@@ -141,8 +150,14 @@ if ($gim_cmd eq "") {
         msg("no remote repository specified yet for this project. Please use 'gim link [repo]'");
         exit;
     }
-    git_add_commit($r);
-    git_push($r);
+    my $repo = extract_repo_id_from_url ($origin -> {origin});
+
+    if ($as_remote == 1) {
+        git_pull($r);
+    } else {
+        git_add_commit($r);
+        git_push($r);
+    }
 
     my $psn_cmd = join (" ", @all_args);
     if ($local) {
@@ -159,17 +174,18 @@ if ($gim_cmd eq "") {
     } 
 
     if (!$local) {
-        msg("running on ".$loc_id.": ".$psn_cmd);
+#        msg("running on ".$loc_id.": ".$psn_cmd);
         my $ssh_cmd = "ssh";
         my $server = $ini -> {servers} -> {$server_id};
         if ($server -> {key} ne "") {
             $ssh_cmd .= " -i ".$server -> {key};
         }
         $ssh_cmd .= " ".$server -> {user}. "@" . $server -> {url};
-        my $ssh_sh = 'echo \#\!\/bin/sh > ssh.sh; echo exec /usr/bin/ssh -o StrictHostKeyChecking=no "\$@" >> ssh.sh';
-        my $ssh_env = 'export GIT_SSH=\"/root/test/ssh.sh\"';
-        my $cmd = '"mkdir test; cd test; git init; git remote rm origin; git remote add origin '.$origin -> {origin}.'; '.$ssh_sh.';'.$ssh_env.'; git pull; '.$psn_cmd.'"';
-        msg ($ssh_cmd ." ". $cmd);
+        # my $ssh_sh = 'echo \#\!\/bin/sh > ssh.sh; echo exec /usr/bin/ssh -o StrictHostKeyChecking=no "\$@" >> ssh.sh';
+        # my $ssh_env = 'export GIT_SSH=\"/root/test/ssh.sh\"';
+#        git init; git remote rm origin; git remote add origin '.$origin -> {origin}.'; git pull origin master; '.$psn_cmd.' &"
+        my $cmd = '"cd '.$server -> {repository_location}.'; mkdir -p '.$repo.'; cd '.$repo.'; gim as_remote '.$psn_cmd.'"';
+       # msg ($ssh_cmd ." ". $cmd);
         open (OUT, $ssh_cmd ." ". $cmd . " &2>1 | ");
         while (my $line = <OUT>) {
             print $line;
