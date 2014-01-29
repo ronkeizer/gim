@@ -55,11 +55,13 @@ sub git_add_commit {
     my $output = $r -> run (@cmd);
     if ($output =~ m/nothing to commit/) {
         msg("no new files or changes found");
-    } else {
+       return(0);
+     } else {
         my $n_add =()= $output =~ /create mode/gi;
         if ($n_add > 0) {
           msg("git added ".$n_add." files to repository (".$m.")");
         }
+        return(1);
     }
 }
 
