@@ -124,7 +124,7 @@ if ($gim_cmd ne "") {
         # my $repo = shift(@all_args);
 #        chdir($folder);
         $local = 1;
-        if (@all_args[0] eq "sync") {
+        if (@all_args[0] ~~ ("sync", "status") ) {
             $gim_cmd = shift(@all_args); 
         } else {
             $gim_cmd = ""; # make sure the psn cmd is run
@@ -152,7 +152,7 @@ if ($gim_cmd ne "") {
                 $ssh_cmd .= " ".$server -> {user}. "@" . $server -> {url};
                 my $origin = git_get_origin ($r);
                 my $repo = extract_repo_id_from_url ($origin -> {origin});
-                my $cmd = '"cd '.$server -> {repository_location}.'; mkdir -p '.$repo.'; cd '.$repo.'; '.$server -> {gim_location}.'/git status "';
+                my $cmd = '"cd '.$server -> {repository_location}.'; mkdir -p '.$repo.'; cd '.$repo.'; '.$server -> {gim_location}.'/gim as_remote status "';
                 open (OUT, $ssh_cmd ." ". $cmd . " | ");
                 while (my $line = <OUT>) {
                     print $line;
