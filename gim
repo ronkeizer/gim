@@ -136,7 +136,7 @@ if ($gim_cmd ne "") {
         if ($serv eq "") {
             my $status = git_get_status($r, $as_remote);
             if ($status =~ m/nothing to commit/) {$status = "no changes found"; }
-            if ($status =~ m/nothing added to commit but/) {$status = "changes found! use 'gim sync [server]' to sync".; }
+            if ($status =~ m/nothing added to commit but/) {$status = "changes found! use 'gim sync [server]' to sync"; }
             msg($status, $as_remote);
             exit;
         } else {
