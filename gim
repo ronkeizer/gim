@@ -180,15 +180,19 @@ if ($gim_cmd eq "") {
     my $psn_cmd = join (" ", @all_args);
     if ($local) {
         # msg("running on local machine: ".$psn_cmd."\n",$as_remote );
-        open (OUT, $psn_cmd . "&2>1 | ");
-        while (my $line = <OUT>) {
-            if ($line =~ m/ITERATION/) {
-                print $line;
+        if ($as_remote) {
+            system ($psn_cmd. " &");
+        } else {
+            open (OUT, $psn_cmd . "&2>1 | ");
+            while (my $line = <OUT>) {
+                if ($line =~ m/ITERATION/) {
+                    print $line;
+                }
             }
+            git_add_commit($r, $as_remote);
+            # look at status  as well !
+            git_push($r, $as_remote);
         }
-        git_add_commit($r, $as_remote);
-        # look at status  as well !
-        git_push($r, $as_remote);
     } 
 
     if (!$local) {
