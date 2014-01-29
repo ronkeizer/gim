@@ -186,7 +186,7 @@ if ($gim_cmd eq "") {
         # my $ssh_sh = 'echo \#\!\/bin/sh > ssh.sh; echo exec /usr/bin/ssh -o StrictHostKeyChecking=no "\$@" >> ssh.sh';
         # my $ssh_env = 'export GIT_SSH=\"/root/test/ssh.sh\"';
 #        git init; git remote rm origin; git remote add origin '.$origin -> {origin}.'; git pull origin master; '.$psn_cmd.' &"
-        my $cmd = '"cd '.$server -> {repository_location}.'; mkdir -p '.$repo.'; cd '.$repo.'; gim as_remote '.$psn_cmd.'"';
+        my $cmd = '"cd '.$server -> {repository_location}.'; mkdir -p '.$repo.'; cd '.$repo.'; '.$server -> {gim_location}.'/gim as_remote '.$psn_cmd.'"';
        # msg ($ssh_cmd ." ". $cmd);
         open (OUT, $ssh_cmd ." ". $cmd . " &2>1 | ");
         while (my $line = <OUT>) {

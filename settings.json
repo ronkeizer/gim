@@ -9,7 +9,7 @@
         "user": "root",
         "url": "ec2-54-219-97-19.us-west-1.compute.amazonaws.com", 
         "repository_location": "/root/git/projects",
-        "gim_location": "/root/git/gim"
+        "gim_location": "/opt/gim"
       }
   }
 }
