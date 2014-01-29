@@ -96,7 +96,14 @@ sub git_get_status {
     my ($r, $as_remote) = @_;
     my @cmd = ("status");
     my $output = $r -> run (@cmd);
-    return($output);
+    my @lines = split("\n", $output);
+    my $out;
+    foreach my $line (@lines) {
+        unless ($line =~ m/^#/) {
+            $out .= $line . "\n";
+        }
+    }
+    return($out);
 }
 
 

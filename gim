@@ -36,7 +36,7 @@ if (@all_args == 0) {
     msg("[error] no arguments to gim.");
     exit;
 }
-my @gim_cmds = qw/init clone sync check status link as_remote/;
+my @gim_cmds = qw/init clone sync status link as_remote/;
 my @psn_cmds = qw/execute bootstrap vpc/;
 my @all_cmd;
 #push (@all_cmd, @gim_cmd, @psn_cmd);
@@ -80,8 +80,8 @@ unless ($local) {
 if ($as_remote == 0) {
 #     print "\n*** Gim version 0.1 \n";
 #     print "*** Jan 2014, RJK \n\n";
-    msg ("defined servers: ".join (" ", @servers), $as_remote);
-    msg ("git account: ".$git_remote -> {url} .":". $git_remote -> {user}, $as_remote);
+#    msg ("defined servers: ".join (" ", @servers), $as_remote);
+#    msg ("git account: ".$git_remote -> {url} .":". $git_remote -> {user}, $as_remote);
 }
 
 ################################################################################################
@@ -109,7 +109,7 @@ our $r = Git::Repository -> new(
             },
         } );
 if ($r =~ m/HASH/) {
-    msg("loaded git repository in current folder.",$as_remote );
+    msg("connected to local git repository",$as_remote );
 }
 # print join(" ",keys(%$r))."\n";
 # print "* gim: Options: ".join(" ",keys(%{$r -> {options}}));
@@ -131,33 +131,69 @@ if ($gim_cmd ne "") {
         }
         $as_remote = 1;
     } 
+    if ($gim_cmd eq "status") {
+        my $serv = shift(@all_args);
+        if ($serv eq "") {
+            my $status = git_get_status($r, $as_remote);
+            msg($status);
+            exit;
+        } else {
+            my @servers_loop = ($serv);
+            if ($serv eq "all") {
+                @servers_loop = @servers;
+            }
+            foreach my $server_id (@servers_loop) {
+                msg("connecting to ".$server_id, $as_remote);
+                my $ssh_cmd = "ssh";
+                my $server = $ini -> {servers} -> {$server_id};
+                if ($server -> {key} ne "") {
+                  $ssh_cmd .= " -i ".$server -> {key};
+                }
+                $ssh_cmd .= " ".$server -> {user}. "@" . $server -> {url};
+                my $origin = git_get_origin ($r);
+                my $repo = extract_repo_id_from_url ($origin -> {origin});
+                my $cmd = '"cd '.$server -> {repository_location}.'; mkdir -p '.$repo.'; cd '.$repo.'; '.$server -> {gim_location}.'/git status "';
+                open (OUT, $ssh_cmd ." ". $cmd . " | ");
+                while (my $line = <OUT>) {
+                    print $line;
+                }
+            }
+        }
+        exit;
+    }
     if ($gim_cmd eq "sync") {
-        msg("Looking for unsaved changes in current folder...",$as_remote );
-        git_pull ($r, $as_remote);
-        git_add_commit ($r, $as_remote);
-        my $status = git_get_status($r, $as_remote);
-        #if ($status =~ m/to be committed/) {
-            git_push ($r, $as_remote);
-        #} else {
-        #    msg("nothing to push", $as_remote);
-        #}
-        my $server_id = shift(@all_args);
-        if ($server_id ne "") {
-            msg("connecting to ".$server_id, $as_remote);
-            my $ssh_cmd = "ssh";
-            my $server = $ini -> {servers} -> {$server_id};
-            if ($server -> {key} ne "") {
-              $ssh_cmd .= " -i ".$server -> {key};
+        my $serv = shift(@all_args);
+        my @servers_loop = ($serv);
+        if ($serv eq "all") {
+            @servers_loop = @servers;
+        }
+#        msg("Looking for unsaved changes in current folder...",$as_remote );
+        # git_pull ($r, $as_remote);
+        # my $status = git_get_status($r, $as_remote);
+#        print $status;
+#        exit;
+#        if (! $status =~ /nothing to commit/) {
+         #   git_add_commit ($r, $as_remote);
+         #   git_push ($r, $as_remote);
+#        }
+        foreach my $server_id (@servers_loop) {
+            if ($server_id ne "") {
+                msg("connecting to ".$server_id, $as_remote);
+                my $ssh_cmd = "ssh";
+                my $server = $ini -> {servers} -> {$server_id};
+                if ($server -> {key} ne "") {
+                  $ssh_cmd .= " -i ".$server -> {key};
+                }
+                $ssh_cmd .= " ".$server -> {user}. "@" . $server -> {url};
+                my $origin = git_get_origin ($r);
+                my $repo = extract_repo_id_from_url ($origin -> {origin});
+                my $cmd = '"cd '.$server -> {repository_location}.'; mkdir -p '.$repo.'; cd '.$repo.'; '.$server -> {gim_location}.'/gim as_remote sync "';
+                open (OUT, $ssh_cmd ." ". $cmd . " | ");
+                while (my $line = <OUT>) {
+                    print $line;
+                }
+                $gim_cmd = "";
             }
-            $ssh_cmd .= " ".$server -> {user}. "@" . $server -> {url};
-            my $origin = git_get_origin ($r);
-            my $repo = extract_repo_id_from_url ($origin -> {origin});
-            my $cmd = '"cd '.$server -> {repository_location}.'; mkdir -p '.$repo.'; cd '.$repo.'; '.$server -> {gim_location}.'/gim as_remote sync "';
-            open (OUT, $ssh_cmd ." ". $cmd . " | ");
-            while (my $line = <OUT>) {
-                print $line;
-            }
-            $gim_cmd = "";
         }
         if ($as_remote == 1) {
             exit;
