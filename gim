@@ -125,9 +125,10 @@ if ($gim_cmd ne "") {
 #        chdir($folder);
         $local = 1;
         if (@all_args[0] eq "sync") {
-            $gim_cmd = shift(@all_args); # make sure the psn cmd is run
+            $gim_cmd = shift(@all_args); 
+            print "synchronize";
         } else {
-            $gim_cmd = "";            
+            $gim_cmd = ""; # make sure the psn cmd is run
         }
         $as_remote = 1;
     } 
@@ -157,6 +158,7 @@ if ($gim_cmd ne "") {
             while (my $line = <OUT>) {
                 print $line;
             }
+            $gim_cmd = "";
         }
     }
     if ($gim_cmd eq "link") {
