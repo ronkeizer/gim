@@ -126,6 +126,7 @@ if ($gim_cmd ne "") {
         $local = 1;
         if (( @all_args[0] eq "sync")||(@all_args[0] eq "status") ) {
             $gim_cmd = shift(@all_args); 
+            print "Setting ".$gim_cmd;
         } else {
             $gim_cmd = ""; # make sure the psn cmd is run
         }
@@ -164,6 +165,7 @@ if ($gim_cmd ne "") {
         exit;
     }
     if ($gim_cmd eq "sync") {
+        msg ("synchronizing");
         my $serv = shift(@all_args);
         my @servers_loop = ($serv);
         if ($serv eq "all") {
