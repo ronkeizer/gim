@@ -18,8 +18,6 @@ use modules::gim qw(read_settings extract_repo_id_from_url msg git_add_commit gi
 my $base_dir = &File::Basename::dirname(realpath($0));
 my @all_args = @ARGV;
 my $key = @all_args[0];
-print "\n*** Gim version 0.1 \n";
-print "*** Jan 2014, RJK \n\n";
 my $cwd = fastgetcwd();
 
 ################################################################################################
@@ -79,8 +77,12 @@ unless ($local) {
 ## Print some info
 ################################################################################################
 
-msg ("defined servers: ".join (" ", @servers), $as_remote);
-msg ("git account: ".$git_remote -> {url} .":". $git_remote -> {user}, $as_remote);
+if ($as_remote == 0) {
+#     print "\n*** Gim version 0.1 \n";
+#     print "*** Jan 2014, RJK \n\n";
+    msg ("defined servers: ".join (" ", @servers), $as_remote);
+    msg ("git account: ".$git_remote -> {url} .":". $git_remote -> {user}, $as_remote);
+}
 
 ################################################################################################
 ## Initialize Git repo, save changes if necessary, push to remote
@@ -126,7 +128,7 @@ if ($gim_cmd ne "") {
         my $repo = shift(@all_args);
         $repo =~ s/\s\r\n//g;
         unless($repo eq "") {
-            git_add_origin($r, $git_remote, $repo);
+            git_add_origin($r, $git_remote, $repo, 0, 0);
         } else {
             msg("no repo name specified.",$as_remote );
             exit;
@@ -160,7 +162,7 @@ if ($gim_cmd eq "") {
             my $folder = fastgetcwd();
             my @dirs = split(/\//, $folder);
             my $repo_id = pop(@dirs);
-            git_add_origin($r, $git_remote, $repo_id);
+            git_add_origin($r, $git_remote, $repo_id, 0, 1);
         } else {
             msg("no remote repository specified yet for this project. Please use 'gim link [repo]'",$as_remote );
             exit;
@@ -168,16 +170,16 @@ if ($gim_cmd eq "") {
     }
     my $repo = extract_repo_id_from_url ($origin -> {origin});
 
-    if ($as_remote == 1) {
-        git_pull($r, $as_remote);
-    } else {
+    git_pull($r, $as_remote); # always pull first
+    if ($as_remote == 0) {
+    # } else {
         git_add_commit($r, $as_remote);
         git_push($r, $as_remote);
     }
 
     my $psn_cmd = join (" ", @all_args);
     if ($local) {
-        msg("running on local machine: ".$psn_cmd."\n",$as_remote );
+        # msg("running on local machine: ".$psn_cmd."\n",$as_remote );
         open (OUT, $psn_cmd . "&2>1 | ");
         while (my $line = <OUT>) {
             if ($line =~ m/ITERATION/) {

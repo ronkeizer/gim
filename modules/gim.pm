@@ -93,25 +93,25 @@ sub git_get_origin {
 }
 
 sub git_add_origin {
-    my ($r, $git_remote, $repo, $flag) = @_;
+    my ($r, $git_remote, $repo, $flag, $as_remote) = @_;
     my $origin = git_get_origin ($r);
     if ($origin -> {origin} eq "") { # test if not already linked
         if ($repo eq "") {
-            msg ("[error] no repo name specified!");  
+            msg ("[error] no repo name specified!", $as_remote);  
             exit;          
         }
         $git_remote -> {repo} = $repo;
         my $new_link = github_form_url($git_remote); 
         my @cmd = ("remote", "add", "origin", $new_link);
         my $output = $r -> run (@cmd);
-        msg("linking local repository to remote (".$repo.")");
+        msg("linking local repository to remote (".$repo.")", $as_remote);
     } else {
         msg("[warning] remote origin already exists!");
         unless($flag) {
-            msg("removing remote link and trying again...");
+            msg("removing remote link and trying again...", $as_remote);
             my @cmd = ("remote", "remove", "origin");
             my $output = $r -> run (@cmd);    
-            git_add_origin($r, $git_remote, $repo, 1)
+            git_add_origin($r, $git_remote, $repo, 1, $as_remote)
         }
         exit;
     } 
