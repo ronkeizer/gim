@@ -166,7 +166,9 @@ if ($gim_cmd eq "") {
             $ssh_cmd .= " -i ".$server -> {key};
         }
         $ssh_cmd .= " ".$server -> {user}. "@" . $server -> {url};
-        my $cmd = '"mkdir test; cd test; git init; git remote remove origin; git remote add origin '.$origin -> {origin}.'; '.$psn_cmd.'"';
+        my $ssh_sh = 'echo \#\!\/bin/sh > ssh.sh; echo exec /usr/bin/ssh -o StrictHostKeyChecking=no "\$@" >> ssh.sh';
+        my $ssh_env = 'export GIT_SSH=\"/root/test/ssh.sh\"';
+        my $cmd = '"mkdir test; cd test; git init; git remote rm origin; git remote add origin '.$origin -> {origin}.'; '.$ssh_sh.';'.$ssh_env.'; git pull; '.$psn_cmd.'"';
         msg ($ssh_cmd ." ". $cmd);
         open (OUT, $ssh_cmd ." ". $cmd . " &2>1 | ");
         while (my $line = <OUT>) {
