@@ -120,6 +120,17 @@ if ($r =~ m/HASH/) {
 
 if ($gim_cmd ne "") {
     shift(@all_args);
+    if ($gim_cmd eq "as_remote") { # received a request to run a model as remote server
+        # my $repo = shift(@all_args);
+#        chdir($folder);
+        $local = 1;
+        if (@all_args[0] eq "sync") {
+            $gim_cmd = shift(@all_args); # make sure the psn cmd is run
+        } else {
+            $gim_cmd = "";            
+        }
+        $as_remote = 1;
+    } 
     if ($gim_cmd eq "sync") {
         msg("Looking for unsaved changes in current folder...",$as_remote );
         git_pull ($r, $as_remote);
@@ -132,6 +143,7 @@ if ($gim_cmd ne "") {
         }
         my $server_id = shift(@all_args);
         if ($server_id ne "") {
+            msg("connecting to ".$server_id, $as_remote);
             my $ssh_cmd = "ssh";
             my $server = $ini -> {servers} -> {$server_id};
             if ($server -> {key} ne "") {
@@ -140,7 +152,7 @@ if ($gim_cmd ne "") {
             $ssh_cmd .= " ".$server -> {user}. "@" . $server -> {url};
             my $origin = git_get_origin ($r);
             my $repo = extract_repo_id_from_url ($origin -> {origin});
-            my $cmd = '"cd '.$server -> {repository_location}.'; mkdir -p '.$repo.'; cd '.$repo.'; '.$server -> {gim_location}.'/gim sync "';
+            my $cmd = '"cd '.$server -> {repository_location}.'; mkdir -p '.$repo.'; cd '.$repo.'; '.$server -> {gim_location}.'/gim as_remote sync "';
             open (OUT, $ssh_cmd ." ". $cmd . " &2>1 | ");
             while (my $line = <OUT>) {
                 print $line;
@@ -157,13 +169,6 @@ if ($gim_cmd ne "") {
             exit;
         }
     }
-    if ($gim_cmd eq "as_remote") { # received a request to run a model as remote server
-        # my $repo = shift(@all_args);
-#        chdir($folder);
-        $local = 1;
-        $gim_cmd = ""; # make sure the psn cmd is run
-        $as_remote = 1;
-    } 
     if ($gim_cmd ne "") {
         msg("done.",$as_remote );
         exit;
