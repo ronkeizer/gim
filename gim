@@ -126,7 +126,6 @@ if ($gim_cmd ne "") {
         $local = 1;
         if (( @all_args[0] eq "sync")||(@all_args[0] eq "status") ) {
             $gim_cmd = shift(@all_args); 
-            print "Setting ".$gim_cmd;
         } else {
             $gim_cmd = ""; # make sure the psn cmd is run
         }
@@ -165,11 +164,16 @@ if ($gim_cmd ne "") {
         exit;
     }
     if ($gim_cmd eq "sync") {
-        msg ("synchronizing");
+        msg ("synchronizing", $as_remote);
         my $serv = shift(@all_args);
         my @servers_loop = ($serv);
         if ($serv eq "all") {
             @servers_loop = @servers;
+        }
+        if ($serv eq "") { # local
+            git_pull($r, $as_remote);
+            git_add_commit($r, $as_remote);
+            git_push($r, $as_remote);
         }
         foreach my $server_id (@servers_loop) {
             if ($server_id ne "") {
