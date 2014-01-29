@@ -126,7 +126,6 @@ if ($gim_cmd ne "") {
         $local = 1;
         if (@all_args[0] eq "sync") {
             $gim_cmd = shift(@all_args); 
-            print "synchronize";
         } else {
             $gim_cmd = ""; # make sure the psn cmd is run
         }
@@ -154,7 +153,7 @@ if ($gim_cmd ne "") {
             my $origin = git_get_origin ($r);
             my $repo = extract_repo_id_from_url ($origin -> {origin});
             my $cmd = '"cd '.$server -> {repository_location}.'; mkdir -p '.$repo.'; cd '.$repo.'; '.$server -> {gim_location}.'/gim as_remote sync "';
-            open (OUT, $ssh_cmd ." ". $cmd . " &2>1 | ");
+            open (OUT, $ssh_cmd ." ". $cmd . " | ");
             while (my $line = <OUT>) {
                 print $line;
             }
@@ -204,11 +203,11 @@ if ($gim_cmd eq "") {
     if ($as_remote == 0) {
          git_add_commit ($r, $as_remote);
          my $status = git_get_status($r, $as_remote);
-         if ($status =~ m/to be committed/) {
+#         if ($status =~ m/to be committed/) {
                 git_push ($r, $as_remote);
-         } else {
+ #        } else {
             msg("nothing to push", $as_remote);
-         }
+ #        }
     }
 
     my $psn_cmd = join (" ", @all_args);
@@ -219,7 +218,7 @@ if ($gim_cmd eq "") {
     	    system ('nohup nice '.$psn_cmd.' > foo.out 2> foo.err < /dev/null &');
     	    sleep (1);
         } else {
-            open (OUT, $psn_cmd . "&2>1 | ");
+            open (OUT, $psn_cmd . " | ");
             while (my $line = <OUT>) {
                 if ($line =~ m/ITERATION/) {
                     print $line;
@@ -243,7 +242,7 @@ if ($gim_cmd eq "") {
 #        git init; git remote rm origin; git remote add origin '.$origin -> {origin}.'; git pull origin master; '.$psn_cmd.' &"
         my $cmd = '"cd '.$server -> {repository_location}.'; mkdir -p '.$repo.'; cd '.$repo.'; '.$server -> {gim_location}.'/gim as_remote '.$psn_cmd.'"';
        # msg ($ssh_cmd ." ". $cmd);
-        open (OUT, $ssh_cmd ." ". $cmd . " &2>1 | ");
+        open (OUT, $ssh_cmd ." ". $cmd . " | ");
         while (my $line = <OUT>) {
             print $line;
         }
