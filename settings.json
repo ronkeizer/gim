@@ -3,13 +3,27 @@
     "user": "ronkeizer",
     "url": "git@github.com"
   },
+  "aws": {
+    "aws_public_key": "",
+    "aws_private_key": ""
+    },
   "servers" : {
       "amz": {
         "key": "~/.ssh/amzkey_mini.rsa",
         "user": "root",
         "url": "ec2-54-219-97-19.us-west-1.compute.amazonaws.com", 
         "repository_location": "/root/git/projects",
-        "gim_location": "/opt/gim"
+        "gim_location": "/opt/gim",
+        "ec2": {
+           "image_id": ""
+        }
+      },
+      "qb3": {
+        "key": "",
+        "user": "ron",
+        "url": "chef.compbio.ucsf.edu", 
+        "repository_location": "/netapp/home/ron/projects",
+        "gim_location": "/netapp/home/ron/git/gim"
       }
   }
 }

@@ -15,6 +15,7 @@ BEGIN{
    push (@INC, $base_dir);
 }
 use modules::gim qw(read_settings extract_repo_id_from_url msg git_add_commit git_get_origin git_get_status git_add_origin git_push git_pull github_form_url);
+use modules::aws qw(start_instance);
 my $base_dir = &File::Basename::dirname(realpath($0));
 my @all_args = @ARGV;
 my $key = @all_args[0];

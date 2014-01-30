@@ -20,8 +20,13 @@ sub read_settings {
     my @lines = <TXT>;
     close TXT;
     my $json_text = join ("", @lines);
-    my $user = JSON::XS->new->utf8->decode ($json_text);
-    return($user);
+    eval {
+        my $user = JSON::XS->new->utf8->decode ($json_text);
+        return($user);
+    } or do {
+        msg( "The settings file seems to be corrupt, please check settings.json" , 0);
+        exit;
+    }
 }
 
 sub extract_repo_id_from_url {
@@ -164,7 +169,7 @@ sub git_push {
                 $flag_done = 1;
             } 
             if ($stderr =~ m/^To /) {
-                msg("updates pushed to remote", $as_remote);              
+                msg("changes pushed to remote", $as_remote);              
                 $flag_done = 1;
             } 
             if ($flag_done == 0) {
