@@ -8,7 +8,7 @@ use Term::ANSIColor;
 use Sys::Hostname;
 use POSIX qw(strftime);
 use Capture::Tiny ':all';
-use JSON::XS;
+use JSON::PP;
 require Exporter;
 
 our @ISA = qw(Exporter);
@@ -21,7 +21,7 @@ sub read_settings {
     close TXT;
     my $json_text = join ("", @lines);
     eval {
-        my $user = JSON::XS->new->utf8->decode ($json_text);
+        my $user = JSON::PP -> new -> utf8 -> decode ($json_text);
         return($user);
     } or do {
         msg( "The settings file seems to be corrupt, please check settings.json" , 0);
