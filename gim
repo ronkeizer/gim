@@ -38,7 +38,7 @@ if (@all_args == 0) {
     exit;
 }
 my @gim_cmds = qw/init clone sync status link as_remote/;
-my @psn_cmds = qw/execute bootstrap vpc/;
+my @psn_cmds = qw/do_psn execute bootstrap vpc/;
 my @all_cmd;
 #push (@all_cmd, @gim_cmd, @psn_cmd);
 my $psn_cmd; my $gim_cmd; my $local = 0; my $loc_id; my $server_id;
