@@ -112,6 +112,7 @@ our $r = Git::Repository -> new(
 if ($r =~ m/HASH/) {
     msg("connected to local git repository",$as_remote );
 }
+
 # print join(" ",keys(%$r))."\n";
 # print "* gim: Options: ".join(" ",keys(%{$r -> {options}}));
 
@@ -258,6 +259,9 @@ if ($gim_cmd eq "") {
     	    system ('nohup nice '.$psn_cmd.' > foo.out 2> foo.err < /dev/null &');
     	    sleep (1);
         } else {
+	    if ($ini -> psn -> prefix ne "") {
+		$psn_cmd = $ini -> psn -> prefix . " " . $psn_cmd;
+	    }
             open (OUT, $psn_cmd . " | ");
             while (my $line = <OUT>) {
                 if ($line =~ m/ITERATION/) {

@@ -1,4 +1,7 @@
 { 
+  "psn": {
+    "prefix": "do_psn"
+  },
   "git": {
     "user": "ronkeizer",
     "url": "git@github.com"
