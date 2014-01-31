@@ -8,8 +8,8 @@ use Term::ANSIColor;
 use Sys::Hostname;
 use POSIX qw(strftime);
 use Capture::Tiny ':all';
-use JSON::XS;
-use Net::Amazon::EC2;
+use JSON::PP;
+#use Net::Amazon::EC2;
 require Exporter;
 
 our @ISA = qw(Exporter);
