@@ -1,7 +1,7 @@
 gim
 ===
 
-`gim` (GIt for Modeling) is a set of wrapper scripts that will allow you to distribute and synchronize models and results between your local computer and remote servers. It is initially aimed at PsN/NONMEM, but will later be extended to other modeling tools as well.
+`gim` (GIt for Modeling) is a wrapper script that facilitates distribution and synchronization of models and results between the local computer and remote servers/clouds. It is initially aimed at PsN/NONMEM, but will later be extended to other modeling tools as well.
 
 
 The problem that `gim` solves
