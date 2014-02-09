@@ -8,6 +8,8 @@ use Cwd qw(fastgetcwd realpath);
 use File::Basename;
 use Git::Repository;
 use Sys::Hostname;
+use File::Copy;
+use Env;
 
 #*** include modules in INC
 BEGIN{
@@ -17,6 +19,7 @@ BEGIN{
 use modules::gim qw(read_settings extract_repo_id_from_url msg git_add_commit git_get_origin git_get_status git_add_origin git_push git_pull github_form_url);
 use modules::aws qw(start_instance);
 my $base_dir = &File::Basename::dirname(realpath($0));
+my $ini_dir = $HOME."/.gim";
 my @all_args = @ARGV;
 my $key = @all_args[0];
 my $cwd = fastgetcwd();
@@ -25,7 +28,15 @@ my $cwd = fastgetcwd();
 ## Get user info
 ################################################################################################
 
-my $ini = read_settings($base_dir . "/settings.json");
+my $ini;
+if (-e $ini_dir . "/settings.json") {
+    $ini = read_settings($ini_dir . "/settings.json");
+} else {
+    unless ($key eq "setup") {
+        msg("no settings file found, please run 'gim setup'");   
+        exit;
+    }     
+}
 our @servers = keys (%{$ini -> {servers} });
 my $git_remote =  $ini -> {git}; 
 
@@ -46,8 +57,8 @@ if ($key eq "help") {
     print "\n";
     exit;
 }
-my @gim_args = qw/as_remote cmd_prefix/;
-my @gim_cmds = qw/init clone sync status link/;
+my @gim_args = qw/as_remote cmd_prefix force/;
+my @gim_cmds = qw/init clone sync status link setup/;
 my @psn_cmds = qw/do_psn execute bootstrap vpc/;
 my @all_cmd;
 #push (@all_cmd, @gim_cmd, @psn_cmd);
@@ -83,7 +94,7 @@ if ( $key ~~ @servers ) { # do a psn command locally ?
 if (!(($key ~~ @gim_cmds )||($key ~~ @psn_cmds)||($key ~~ @servers))) { # not a recognized command
     my $par = shift(@all_args);
     unless ($par =~ m/as_remote/) {
-    msg("[error] '".$par."' is not a recognized gip or psn command, nor a defined cluster.", $arg{as_remote});
+    msg("[error] '".$par."' is not a recognized gim or psn command, nor a defined remote server.", $arg{as_remote});
     exit;
     }
 }
@@ -155,6 +166,27 @@ if ($gim_cmd ne "") {
     	# my ($tmp, $serv) = split(/=/, $gim_cmd);
 	    # $arg{as_remote} = $serv;
     } 
+    if ($gim_cmd eq "setup") {
+        unless (-d $ini_dir) {
+            mkdir($ini_dir);
+            msg("created gim settings folder (".$ini_dir.")");
+        } else {
+            msg("gim settings folder found (".$ini_dir.")");    
+        }
+        if (-e $ini_dir."/settings.json") {
+            msg("user settings file found (use 'rm ~/.gim/settings.json' to reset)")            
+        } else {
+            copy ($base_dir."/settings_template.json", $ini_dir."/settings.json");
+            msg("copied template settings file to user folder (".$ini_dir.")");
+        }
+        msg("opening gim settings file");
+        sleep(1);
+        my $editor = "nano";
+        if ($EDITOR ne "") { $editor = $EDITOR; }; 
+        system($editor." ".$ini_dir."/settings.json");
+        msg("done.", $arg{as_remote} );
+        exit;
+    }
     if ($gim_cmd eq "status") {
         my $serv = shift(@all_args);
         if ($serv eq "") {

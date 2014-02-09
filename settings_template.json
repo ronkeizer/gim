@@ -1,0 +1,30 @@
+{ 
+  "_comment": "Settings for git need to be defined both on local machine and remote machines",
+  "git": {
+    "user": "ronkeizer",
+    "url": "git@github.com"
+  },
+  "_comment": "The servers are defined below, and only need to be defined on the local machine.",
+  "servers" : {
+      "amz": {
+        "key": "~/.ssh/amzkey_mini.rsa",
+        "user": "root",
+        "url": "ec2-54-219-97-19.us-west-1.compute.amazonaws.com", 
+        "repository_location": "/root/git/projects",
+        "gim_location": "/opt/gim",
+        "ec2": {
+           "image_id": ""
+        }
+      },
+      "qb3": {
+        "psn": {
+          "prefix": "do_psn"
+        },
+        "key": "",
+        "user": "ron",
+        "url": "chef.compbio.ucsf.edu", 
+        "repository_location": "/netapp/home/ron/projects",
+        "gim_location": "/netapp/home/ron/git/gim"
+      }
+  }
+}
