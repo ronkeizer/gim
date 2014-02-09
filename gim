@@ -42,7 +42,7 @@ my @psn_cmds = qw/do_psn execute bootstrap vpc/;
 my @all_cmd;
 #push (@all_cmd, @gim_cmd, @psn_cmd);
 my $psn_cmd; my $gim_cmd; my $local = 0; my $loc_id; my $server_id;
-if ( $key ~~ @gim_cmds ) { # do a gim command?
+if ( $key ~~ @gim_cmds || $key =~ /as_remote/) { # do a gim command?
     $gim_cmd = $key;
     $local = 1;
 #   msg("running gim command ".$key);
@@ -135,8 +135,8 @@ if ($gim_cmd ne "") {
         } else {
             $gim_cmd = ""; # make sure the psn cmd is run
         }
-	my ($tmp, $serv) = split(/=/, $gim_cmd);
-	$as_remote = $serv;
+    	# my ($tmp, $serv) = split(/=/, $gim_cmd);
+	    # $as_remote = $serv;
     } 
     if ($gim_cmd eq "status") {
         my $serv = shift(@all_args);
