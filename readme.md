@@ -15,12 +15,18 @@ The mechanism
 
     gim [location] [PsN command]
 
-The location indicator specifies where you want to run the PsN command. With every call to `gim`, your model and results are first saved to the local Git repository and synchronized to the cloud (`commit` + `push`), before any run is started. If the location indicator is not `local`, then `gim` will login to the specified server, lookup the project folder you are working in locally, and synchronize to the latest version of your models (`git pull`). Afer that it will start the actual PsN command on the server, and return to your local console. With the `status` and `sync` commands you can check run progress and synchronize results between your local computer and your server(s).
+The location indicator specifies where you want to run the PsN command. With every call to `gim`, your model and results are first saved to the local Git repository and synchronized to the cloud (`commit` + `push`), before any run is started. If the location indicator is not `local`, then `gim` will login to the specified server, lookup the project folder you are working in locally, and synchronize to the latest version of your models (`git pull`). Afer that it will start the actual PsN command on the server, and return to your local console. 
+
+With the `status` and `sync` commands you can check run progress and synchronize results between your local computer and your server(s).
 
 Some example commands
 ---------------------
 
-    # run the model locally 
+    # Setup gim on machine and customize settings. This command needs to 
+    # be run on the local machine and on the remote server(s).
+    gim setup
+
+    # run a model locally 
     # (same as 'execute run1.mod', but first saves/syncs changes)
     gim local execute run1.mod    
 
@@ -67,6 +73,6 @@ Requirements
 
 License
 -------
-`gim` is released under the open source MIT license.
+Open source MIT license.
 
 

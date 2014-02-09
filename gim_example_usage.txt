@@ -1,10 +1,15 @@
-Gim (version 0.1)
+Gim (version 0.1, RJK 2014)
 
 Syntax: 
+
     gim [arguments] [location] [psn command]";
     gim [arguments] [gim command] [gim command arguments]\n";
 
 Examples of usage:
+
+    # setup gim 
+    gim setup
+
     # run the model locally 
     gim local execute run1.mod    
 

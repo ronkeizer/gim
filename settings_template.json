@@ -7,14 +7,14 @@
   "_comment": "The servers are defined below, and only need to be defined on the local machine.",
   "servers" : {
       "amz": {
+        "psn": {
+          "prefix": ""
+        },
         "key": "~/.ssh/amzkey_mini.rsa",
         "user": "root",
         "url": "ec2-54-219-97-19.us-west-1.compute.amazonaws.com", 
         "repository_location": "/root/git/projects",
-        "gim_location": "/opt/gim",
-        "ec2": {
-           "image_id": ""
-        }
+        "gim_location": "/opt/gim"
       },
       "qb3": {
         "psn": {
