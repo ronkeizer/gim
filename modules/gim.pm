@@ -39,8 +39,8 @@ sub msg {
    my ($msg, $as_remote) = @_;
    $msg = $msg."\n";
    my $flag = 0;
-   if ($as_remote) {
-       print colored (['blue'], "gim remote: ");
+   if ($as_remote ne "") {
+       print colored (['blue'], "gim (".$as_remote."): ");
     } else {
        print colored (['green'], "gim: ");
     }
