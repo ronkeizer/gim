@@ -110,7 +110,7 @@ our $r = Git::Repository -> new(
             },
         } );
 if ($r =~ m/HASH/) {
-    msg("connected to local git repository",$as_remote );
+    msg("git repository found",$as_remote );
 }
 
 # print join(" ",keys(%$r))."\n";
