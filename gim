@@ -34,22 +34,31 @@ my $git_remote =  $ini -> {git};
 ################################################################################################
 
 if (@all_args == 0) {
-    msg("[error] no arguments to gim.");
+    msg("[error] no arguments to gim. Type 'gim help' for usage info.");
     exit;
 }
-my @gim_args = qw/as_remote/;
+if ($key eq "help") {
+    open (TXT, "<".$base_dir."/gim_example_usage.txt");
+    while (my $line = <TXT>) {
+        print $line;
+    }
+    close (TXT);
+    print "\n";
+    exit;
+}
+my @gim_args = qw/as_remote cmd_prefix/;
 my @gim_cmds = qw/init clone sync status link/;
 my @psn_cmds = qw/do_psn execute bootstrap vpc/;
 my @all_cmd;
 #push (@all_cmd, @gim_cmd, @psn_cmd);
 my $psn_cmd; my $gim_cmd; my $local = 0; my $loc_id; my $server_id; my @set_args;
-my $as_remote = "";
+my %arg;
+$arg{as_remote} = "";
 foreach my $arg (@gim_args) {
-    if ($key =~ m/$arg/) {
-        if ($arg eq "as_remote") {
-            my ($tmp, $serv) = split(/\=/, $key);
-            $as_remote = $serv;
-        }
+    if ($key =~ m/^\-/) {
+        $key =~ s/^\-//;
+        my ($left, $right) = split(/\=/, $key);
+        $arg{$left} = $right;
         push (@set_args, $key);
         shift(@all_args);
         $key = @all_args[0];
@@ -68,13 +77,13 @@ if ( $key ~~ @psn_cmds ) { # do a psn command locally ?
 } 
 if ( $key ~~ @servers ) { # do a psn command locally ?
     $server_id = $key;
-#    msg("running on server (".$server_id.")", $as_remote );
+#    msg("running on server (".$server_id.")", $arg{as_remote} );
     $local = 0;
 } 
 if (!(($key ~~ @gim_cmds )||($key ~~ @psn_cmds)||($key ~~ @servers))) { # not a recognized command
     my $par = shift(@all_args);
     unless ($par =~ m/as_remote/) {
-    msg("[error] '".$par."' is not a recognized gip or psn command, nor a defined cluster.", $as_remote);
+    msg("[error] '".$par."' is not a recognized gip or psn command, nor a defined cluster.", $arg{as_remote});
     exit;
     }
 }
@@ -90,11 +99,11 @@ unless ($local) {
 ## Print some info
 ################################################################################################
 
-if ($as_remote eq "") {
+if ($arg{as_remote} eq "") {
 #     print "\n*** Gim version 0.1 \n";
 #     print "*** Jan 2014, RJK \n\n";
-#    msg ("defined servers: ".join (" ", @servers), $as_remote);
-#    msg ("git account: ".$git_remote -> {url} .":". $git_remote -> {user}, $as_remote);
+#    msg ("defined servers: ".join (" ", @servers), $arg{as_remote});
+#    msg ("git account: ".$git_remote -> {url} .":". $git_remote -> {user}, $arg{as_remote});
 }
 
 ################################################################################################
@@ -104,7 +113,7 @@ if ($as_remote eq "") {
 our $cwd = ".";
 my $dir = $cwd;
 unless (-d $dir."/.git") {
-    msg ("creating new git repository in current folder.",$as_remote );
+    msg ("creating new git repository in current folder.",$arg{as_remote} );
     Git::Repository -> run( 
         init => $dir,
         { 
@@ -122,7 +131,7 @@ our $r = Git::Repository -> new(
             },
         } );
 if ($r =~ m/HASH/) {
-    msg("git repository found",$as_remote );
+    msg("git repository found",$arg{as_remote} );
 }
 
 # print join(" ",keys(%$r))."\n";
@@ -144,12 +153,12 @@ if ($gim_cmd ne "") {
             $gim_cmd = ""; # make sure the psn cmd is run
         }
     	# my ($tmp, $serv) = split(/=/, $gim_cmd);
-	    # $as_remote = $serv;
+	    # $arg{as_remote} = $serv;
     } 
     if ($gim_cmd eq "status") {
         my $serv = shift(@all_args);
         if ($serv eq "") {
-            my ($status, $rest) = git_get_status($r, $as_remote);
+            my ($status, $rest) = git_get_status($r, $arg{as_remote});
             my $report_status = $status;
             if ($status =~ m/nothing to commit/) {$report_status = "no changes found"; }
             if ($status =~ m/nothing added to commit but/) {$report_status = "changes found! use 'gim sync [server]' to sync"; }
@@ -160,7 +169,7 @@ if ($gim_cmd ne "") {
             if ($rest =~ m/Untracked files:/) {
                 $report_status .= "new files found.";
             }
-            msg($report_status, $as_remote);
+            msg($report_status, $arg{as_remote});
             exit;
         } else {
             my @servers_loop = ($serv);
@@ -168,7 +177,7 @@ if ($gim_cmd ne "") {
                 @servers_loop = @servers;
             }
             foreach my $server_id (@servers_loop) {
-                msg("connecting to ".$server_id, $as_remote);
+                msg("connecting to ".$server_id, $arg{as_remote});
                 my $ssh_cmd = "ssh";
                 my $server = $ini -> {servers} -> {$server_id};
                 if ($server -> {key} ne "") {
@@ -187,21 +196,21 @@ if ($gim_cmd ne "") {
         exit;
     }
     if ($gim_cmd eq "sync") {
-        msg ("synchronizing", $as_remote);
+        msg ("synchronizing", $arg{as_remote});
         my $serv = shift(@all_args);
         my @servers_loop = ($serv);
         if ($serv eq "all") {
             @servers_loop = @servers;
         }
         if ($serv eq "") { # local
-            git_pull($r, $as_remote);
-            git_add_commit($r, $as_remote);
-            git_push($r, $as_remote);
+            git_pull($r, $arg{as_remote});
+            git_add_commit($r, $arg{as_remote});
+            git_push($r, $arg{as_remote});
             exit;
         }
         foreach my $server_id (@servers_loop) {
             if ($server_id ne "") {
-                msg("connecting to ".$server_id, $as_remote);
+                msg("connecting to ".$server_id, $arg{as_remote});
                 my $ssh_cmd = "ssh";
                 my $server = $ini -> {servers} -> {$server_id};
                 if ($server -> {key} ne "") {
@@ -217,8 +226,8 @@ if ($gim_cmd ne "") {
                 }
             }
         }
-        if ($as_remote eq "") {
-            git_pull ($r, $as_remote);
+        if ($arg{as_remote} eq "") {
+            git_pull ($r, $arg{as_remote});
         }
         exit;
     }
@@ -228,12 +237,12 @@ if ($gim_cmd ne "") {
         unless($repo eq "") {
             git_add_origin($r, $git_remote, $repo, 0, 0);
         } else {
-            msg("no repo name specified.",$as_remote );
+            msg("no repo name specified.",$arg{as_remote} );
             exit;
         }
     }
     if ($gim_cmd ne "") {
-        msg("done.",$as_remote );
+        msg("done.",$arg{as_remote} );
         exit;
     }
 }
@@ -249,27 +258,24 @@ if ($gim_cmd eq "") {
     ## add files to the repo if new results available
     my $origin = git_get_origin ($r);
     if ($origin -> {origin} eq "") {
-        if ($as_remote ne "") {
+        if ($arg{as_remote} ne "") {
             my $folder = fastgetcwd();
             my @dirs = split(/\//, $folder);
             my $repo_id = pop(@dirs);
             git_add_origin($r, $git_remote, $repo_id, 0, 1);
         } else {
-            msg("no remote repository specified yet for this project. Please use 'gim link [repo]'",$as_remote );
+            msg("no remote repository specified yet for this project. Please use 'gim link [repo]'",$arg{as_remote} );
             exit;
         }
     }
     my $repo = extract_repo_id_from_url ($origin -> {origin});
 
-    git_pull ($r, $as_remote);
-    if ($as_remote eq "") {
-         git_add_commit ($r, $as_remote);
-         my $status = git_get_status($r, $as_remote);
-#         if ($status =~ m/to be committed/) {
-                git_push ($r, $as_remote);
- #        } else {
- #           msg("nothing to push", $as_remote);
- #        }
+# RK: Should we do a pull? probably not, unless you also work in the cloud. Make setting for this.
+#    git_pull ($r, $arg{as_remote});
+    if ($arg{as_remote} eq "") {
+         git_add_commit ($r, $arg{as_remote});
+         my $status = git_get_status($r, $arg{as_remote});
+         git_push ($r, $arg{as_remote});
     }
 
     my $psn_cmd = join (" ", @all_args);
@@ -277,9 +283,9 @@ if ($gim_cmd eq "") {
     	$psn_cmd = $ini -> {"psn"} -> {"prefix"} . " " . $psn_cmd;
     }
     if ($local) {
-        # msg("running on local machine: ".$psn_cmd."\n",$as_remote );
-        if ($as_remote ne "") {
-            msg("starting PsN (".$psn_cmd.")", $as_remote);
+        # msg("running on local machine: ".$psn_cmd."\n",$arg{as_remote} );
+        if ($arg{as_remote} ne "") {
+            msg("starting PsN (".$psn_cmd.")", $arg{as_remote});
     	    system ('nohup nice '.$psn_cmd.' > foo.out 2> foo.err < /dev/null &');
     	    sleep (1);
         } else {
@@ -289,9 +295,9 @@ if ($gim_cmd eq "") {
                     print $line;
                 }
             }
-            git_add_commit($r, $as_remote);
+            git_add_commit($r, $arg{as_remote});
             # look at status  as well !
-            git_push($r, $as_remote);
+            git_push($r, $arg{as_remote});
         }
     } 
     if (!$local) {
@@ -314,5 +320,5 @@ if ($gim_cmd eq "") {
     }
 }
 # print "\n";
-msg("done.", $as_remote);
+msg("done.", $arg{as_remote});
 exit;

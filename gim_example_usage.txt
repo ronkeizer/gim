@@ -1,0 +1,29 @@
+Gim (version 0.1)
+
+Syntax: 
+    gim [arguments] [location] [psn command]";
+    gim [arguments] [gim command] [gim command arguments]\n";
+
+Examples of usage:
+    # run the model locally 
+    gim local execute run1.mod    
+
+    # 'local' may be dropped, as it is default
+    gim execute run1.mod    
+
+    # Run the same model but now on the 'serv1' cluster
+    gim serv1 execute run1.mod 
+
+    # Check if any results are available on any of the specified servers
+    gim status
+
+    # Check if any results are available on server 'serv1'
+    gim status serv1
+
+    # Look for new models/results on 'serv1' and synchronize 
+    gim sync serv1
+
+    # Set up the git repository on your local machine, as well as
+    # on all specified servers
+    gim init 
+    gim sync
