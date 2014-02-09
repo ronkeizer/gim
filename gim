@@ -48,10 +48,12 @@ if ( $key ~~ @gim_cmds ) { # do a gim command?
     $local = 1;
 #   msg("running gim command ".$key);
 } 
+my $as_remote = "";
 if ($gim_cmd =~ m/as_remote/) {
     my ($tmp, $serv) = split(/=/, $gim_cmd);
     $as_remote = $serv;
 }
+
 if ( $key ~~ @psn_cmds ) { # do a psn command locally ?
     $psn_cmd = $key;
 #    msg("running PsN command '".$psn_cmd."' on local machine.");
@@ -64,7 +66,9 @@ if ( $key ~~ @servers ) { # do a psn command locally ?
 } 
 if (!(($key ~~ @gim_cmds )||($key ~~ @psn_cmds)||($key ~~ @servers))) { # not a recognized command
     my $par = shift(@all_args);
+    unless ($par =~ m/as_remote/) {
     msg("[error] '".$par."' is not a recognized gip or psn command, nor a defined cluster.", $as_remote);
+    }
     exit;
 }
 
