@@ -136,15 +136,15 @@ if ($gim_cmd ne "") {
     if ($gim_cmd eq "status") {
         my $serv = shift(@all_args);
         if ($serv eq "") {
-            my $status = git_get_status($r, $as_remote);
+            my ($status, $rest) = git_get_status($r, $as_remote);
             my $report_status = $status;
             if ($status =~ m/nothing to commit/) {$report_status = "no changes found"; }
             if ($status =~ m/nothing added to commit but/) {$report_status = "changes found! use 'gim sync [server]' to sync"; }
-            my $modified =()= $status =~ /modified:/gi;
+            my $modified =()= $rest =~ /modified:/gi;
             if ($modified > 0) { 
-                $report_status = "changes found: ".$modified." files modified.";
+                $report_status = "changes found: ".$modified." files modified. ";
             }
-            if ($status =~ m/Untracked files:/) {
+            if ($rest =~ m/Untracked files:/) {
                 $report_status .= "new files found.";
             }
             msg($report_status, $as_remote);

@@ -103,12 +103,15 @@ sub git_get_status {
     my $output = $r -> run (@cmd);
     my @lines = split("\n", $output);
     my $out;
+    my $rest;
     foreach my $line (@lines) {
         unless ($line =~ m/^#/) {
             $out .= $line . "\n";
-        }
+        } else {
+	    $rest .= $line;
+	}
     }
-    return($out);
+    return($out, $rest);
 }
 
 
