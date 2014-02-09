@@ -266,7 +266,7 @@ if ($gim_cmd eq "") {
 
     my $psn_cmd = join (" ", @all_args);
     if ($ini -> {"psn"} -> {"prefix"} ne "") {
-	$psn_cmd = $ini -> {"psn"} -> {"prefix"} . " " . $psn_cmd;
+    	$psn_cmd = $ini -> {"psn"} -> {"prefix"} . " " . $psn_cmd;
     }
     if ($local) {
         # msg("running on local machine: ".$psn_cmd."\n",$as_remote );

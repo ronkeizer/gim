@@ -1,7 +1,4 @@
 { 
-  "psn": {
-    "prefix": "do_psn"
-  },
   "git": {
     "user": "ronkeizer",
     "url": "git@github.com"
@@ -22,6 +19,9 @@
         }
       },
       "qb3": {
+        "psn": {
+          "prefix": "do_psn"
+        },
         "key": "",
         "user": "ron",
         "url": "chef.compbio.ucsf.edu", 
