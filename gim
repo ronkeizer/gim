@@ -42,7 +42,6 @@ my @psn_cmds = qw/do_psn execute bootstrap vpc/;
 my @all_cmd;
 #push (@all_cmd, @gim_cmd, @psn_cmd);
 my $psn_cmd; my $gim_cmd; my $local = 0; my $loc_id; my $server_id;
-my $as_remote = 0; 
 if ( $key ~~ @gim_cmds ) { # do a gim command?
     $gim_cmd = $key;
     $local = 1;
@@ -50,7 +49,7 @@ if ( $key ~~ @gim_cmds ) { # do a gim command?
 } 
 my $as_remote = "";
 if ($gim_cmd =~ m/as_remote/) {
-    my ($tmp, $serv) = split(/=/, $gim_cmd);
+    my ($tmp, $serv) = split(/\=/, $gim_cmd);
     $as_remote = $serv;
 }
 
@@ -68,8 +67,8 @@ if (!(($key ~~ @gim_cmds )||($key ~~ @psn_cmds)||($key ~~ @servers))) { # not a 
     my $par = shift(@all_args);
     unless ($par =~ m/as_remote/) {
     msg("[error] '".$par."' is not a recognized gip or psn command, nor a defined cluster.", $as_remote);
-    }
     exit;
+    }
 }
 
 if ($key eq "local") {
