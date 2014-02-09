@@ -1,9 +1,0 @@
-
-- add delegations for 'get', 'set' in all native attr traits.
-e.g. bool has no 'get'.
-
-
-- more native attr handlers:
-    is_member -- pass in an equality sub that compares $_[0] and $_[1]
-    first_index
-    any, all, non, notall, true, false etc.
