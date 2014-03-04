@@ -42,7 +42,7 @@ if ($key eq "help") {
     exit;
 }
 my @gim_args = qw/as_remote cmd_prefix force/;
-my @gim_cmds = qw/init clone sync status link setup servers/;
+my @gim_cmds = qw/init clone sync status link setup servers tunnel/;
 my @psn_cmds = qw/do_psn execute bootstrap vpc/;
 my @all_cmd;
 #push (@all_cmd, @gim_cmd, @psn_cmd);
@@ -114,6 +114,26 @@ unless ($local) {
 if ($gim_cmd eq "servers") {
     foreach (@servers) {
         print $_."\n";
+    }
+    exit;
+}
+if ($gim_cmd eq "tunnel") {
+    my $user = $ENV{"USER"};
+    my $user_local = @all_args[1];
+    open (WHO, "who | grep ".$user." |");
+    my $host;
+    while (my $line = <WHO>) {
+	my @inf = split(" ", $line);
+	if (@inf[0] eq $user) {
+	    $host = pop(@inf);
+	    $host =~ s/[\(\)]//g;
+	}
+    }
+    close (WHO);
+    if ($host eq "") {
+	msg("Tunnel failed, failed to identify connecting host");
+    } else {
+	system('ssh -4 '.$user_local.'@'.$host.' -L 8001:github.com:22 -N');
     }
     exit;
 }
