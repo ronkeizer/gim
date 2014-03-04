@@ -350,7 +350,8 @@ if ($gim_cmd eq "") {
 	       git_add_commit ($r, $arg{as_remote});
 	       my $status = git_get_status($r, $arg{as_remote});
 	       git_push ($r, $arg{as_remote});
-	   }    
+	   }   
+       print "asdfasdf"; 
     }
 
     my $psn_cmd = join (" ", @all_args);
