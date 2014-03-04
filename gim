@@ -153,30 +153,31 @@ if ($arg{as_remote} eq "") {
 ## Initialize Git repo, save changes if necessary, push to remote
 ################################################################################################
 
-our $cwd = ".";
-my $dir = $cwd;
-unless (-d $dir."/.git") {
-    msg ("creating new git repository in current folder.",$arg{as_remote} );
-    Git::Repository -> run( 
-        init => $dir,
-        { 
+unless(exists_in_array($gim_cmd, ["qstat"])) {
+    our $cwd = ".";
+    my $dir = $cwd;
+    unless (-d $dir."/.git") {
+	msg ("creating new git repository in current folder.",$arg{as_remote} );
+	Git::Repository -> run( 
+	    init => $dir,
+	    { 
+		env => {
+		    GIT_COMMITTER_EMAIL => 'ronkeizer@gmail.com',
+		    GIT_COMMITTER_NAME  => 'Ron Keizer',
+		},
+	    } );
+    }
+    our $r = Git::Repository -> new( 
+	work_tree => $dir, { 
             env => {
                 GIT_COMMITTER_EMAIL => 'ronkeizer@gmail.com',
                 GIT_COMMITTER_NAME  => 'Ron Keizer',
             },
         } );
+    if ($r =~ m/HASH/) {
+	msg("git repository found",$arg{as_remote} );
+    }
 }
-our $r = Git::Repository -> new( 
-    work_tree => $dir, { 
-            env => {
-                GIT_COMMITTER_EMAIL => 'ronkeizer@gmail.com',
-                GIT_COMMITTER_NAME  => 'Ron Keizer',
-            },
-        } );
-if ($r =~ m/HASH/) {
-    msg("git repository found",$arg{as_remote} );
-}
-
 # print join(" ",keys(%$r))."\n";
 # print "* gim: Options: ".join(" ",keys(%{$r -> {options}}));
 
@@ -343,10 +344,12 @@ if ($gim_cmd eq "") {
 
 # RK: Should we do a pull? probably not, unless you also work in the cloud. Make setting for this.
 #    git_pull ($r, $arg{as_remote});
-    if ($arg{as_remote} eq "") {
-         git_add_commit ($r, $arg{as_remote});
-         my $status = git_get_status($r, $arg{as_remote});
-         git_push ($r, $arg{as_remote});
+    unless(exists_in_array($gim_cmd, ["qstat"])) {
+	if ($arg{as_remote} eq "") {
+	    git_add_commit ($r, $arg{as_remote});
+	    my $status = git_get_status($r, $arg{as_remote});
+	    git_push ($r, $arg{as_remote});
+	}
     }
 
     my $psn_cmd = join (" ", @all_args);
