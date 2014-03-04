@@ -42,7 +42,7 @@ if ($key eq "help") {
     exit;
 }
 my @gim_args = qw/as_remote cmd_prefix force/;
-my @gim_cmds = qw/init clone sync status link setup servers tunnel/;
+my @gim_cmds = qw/init clone sync status link setup servers tunnel qstat/;
 my @psn_cmds = qw/do_psn execute bootstrap vpc/;
 my @all_cmd;
 #push (@all_cmd, @gim_cmd, @psn_cmd);
@@ -218,6 +218,13 @@ if ($gim_cmd ne "") {
         system($editor." ".$ini_dir."/settings.json");
         msg("done.", $arg{as_remote} );
         exit;
+    }
+    if ($gim_cmd eq "qstat") {
+	msg("running jobs: ", $arg{as_remote});
+	system("qstat -s r");
+	msg("scheduled jobs: ", $arg{as_remote});
+	system("qstat -s z");
+	exit;
     }
     if ($gim_cmd eq "status") {
         my $serv = shift(@all_args);
