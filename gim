@@ -153,7 +153,7 @@ if ($arg{as_remote} eq "") {
 ## Initialize Git repo, save changes if necessary, push to remote
 ################################################################################################
 
-unless(exists_in_array($gim_cmd, ["qstat"])) {
+# unless(exists_in_array($gim_cmd, ["qstat"])) {
     our $cwd = ".";
     my $dir = $cwd;
     unless (-d $dir."/.git") {
@@ -177,7 +177,7 @@ unless(exists_in_array($gim_cmd, ["qstat"])) {
     if ($r =~ m/HASH/) {
 	msg("git repository found",$arg{as_remote} );
     }
-}
+#}
 # print join(" ",keys(%$r))."\n";
 # print "* gim: Options: ".join(" ",keys(%{$r -> {options}}));
 
@@ -221,11 +221,11 @@ if ($gim_cmd ne "") {
         exit;
     }
     if ($gim_cmd eq "qstat") {
-	msg("running jobs: ", $arg{as_remote});
-	system("qstat -s r");
-	msg("scheduled jobs: ", $arg{as_remote});
-	system("qstat -s z");
-	exit;
+        msg("running jobs: ", $arg{as_remote});
+	    system("qstat -s r");
+        msg("scheduled jobs: ", $arg{as_remote});
+	    system("qstat -s z");
+	    exit;
     }
     if ($gim_cmd eq "status") {
         my $serv = shift(@all_args);
@@ -344,12 +344,12 @@ if ($gim_cmd eq "") {
 
 # RK: Should we do a pull? probably not, unless you also work in the cloud. Make setting for this.
 #    git_pull ($r, $arg{as_remote});
-    unless(exists_in_array($gim_cmd, ["qstat"])) {
-	if ($arg{as_remote} eq "") {
-	    git_add_commit ($r, $arg{as_remote});
-	    my $status = git_get_status($r, $arg{as_remote});
-	    git_push ($r, $arg{as_remote});
-	}
+    unless($gim_cmd eq "qstat") {
+    	if ($arg{as_remote} eq "") {
+	       git_add_commit ($r, $arg{as_remote});
+	       my $status = git_get_status($r, $arg{as_remote});
+	       github_push ($r, $arg{as_remote});
+	   }    
     }
 
     my $psn_cmd = join (" ", @all_args);
