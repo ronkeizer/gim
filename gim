@@ -344,14 +344,12 @@ if ($gim_cmd eq "") {
 
 # RK: Should we do a pull? probably not, unless you also work in the cloud. Make setting for this.
 #    git_pull ($r, $arg{as_remote});
-    unless($gim_cmd ~~ ("qstat")) {
-        print "uaa";
+    unless("qstat" ~~ @all_args) {
     	if ($arg{as_remote} eq "") {
 	       git_add_commit ($r, $arg{as_remote});
 	       my $status = git_get_status($r, $arg{as_remote});
 	       git_push ($r, $arg{as_remote});
 	   }   
-       print "asdfasdf"; 
     }
 
     my $psn_cmd = join (" ", @all_args);
