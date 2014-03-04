@@ -25,22 +25,6 @@ my $key = @all_args[0];
 my $cwd = fastgetcwd();
 
 ################################################################################################
-## Get user info
-################################################################################################
-
-my $ini;
-if (-e $ini_dir . "/settings.json") {
-    $ini = read_settings($ini_dir . "/settings.json");
-} else {
-    unless ($key eq "setup") {
-        msg("no settings file found, please run 'gim setup'");   
-        exit;
-    }     
-}
-our @servers = keys (%{$ini -> {servers} });
-my $git_remote =  $ini -> {git}; 
-
-################################################################################################
 ## Interpret what to do from command line
 ################################################################################################
 
@@ -58,7 +42,7 @@ if ($key eq "help") {
     exit;
 }
 my @gim_args = qw/as_remote cmd_prefix force/;
-my @gim_cmds = qw/init clone sync status link setup/;
+my @gim_cmds = qw/init clone sync status link setup servers/;
 my @psn_cmds = qw/do_psn execute bootstrap vpc/;
 my @all_cmd;
 #push (@all_cmd, @gim_cmd, @psn_cmd);
@@ -75,6 +59,27 @@ foreach my $arg (@gim_args) {
         $key = @all_args[0];
     }
 }
+
+################################################################################################
+## Get user info
+################################################################################################
+
+my $ini;
+if (-e $ini_dir . "/settings.json") {
+    $ini = read_settings($ini_dir . "/settings.json");
+} else {
+    unless ($key eq "setup") {
+        msg("no settings file found, please run 'gim setup'", $arg{as_remote});   
+        exit;
+    }     
+}
+our @servers = keys (%{$ini -> {servers} });
+my $git_remote =  $ini -> {git}; 
+
+################################################################################################
+## Decide what to do
+################################################################################################
+
 if ( $key ~~ @gim_cmds) { # do a gim command?
     $gim_cmd = $key;
     $local = 1;
@@ -104,6 +109,13 @@ if ($key eq "local") {
 }
 unless ($local) {
     $loc_id = shift(@all_args); 
+}
+
+if ($gim_cmd eq "servers") {
+    foreach (@servers) {
+        print $_."\n";
+    }
+    exit;
 }
 
 ################################################################################################
