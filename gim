@@ -228,7 +228,9 @@ if ($gim_cmd ne "") {
         msg("running jobs: ", $arg{as_remote});
 	    system("qstat -s r");
         msg("scheduled jobs: ", $arg{as_remote});
-	    system("qstat -s z");
+	    system("qstat -s p");
+        msg("recently finished jobs: ", $arg{as_remote});
+        system("qstat -s p");
 	    exit;
     }
     if ($gim_cmd eq "status") {
