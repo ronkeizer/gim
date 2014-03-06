@@ -197,7 +197,6 @@ sub git_pull {
     my @cmd = ("pull", "origin", "master");
     my ($stdout, $stderr, @result) = capture {
       $output = $r -> run (@cmd);
-      print $stdout;
     };  
 }
 
