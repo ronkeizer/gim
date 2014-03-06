@@ -272,7 +272,7 @@ if ($gim_cmd ne "") {
         exit;
     }
     if ($gim_cmd eq "sync") {
-        msg ("starting synchronize", $arg{as_remote});
+#        msg ("starting synchronize", $arg{as_remote});
         my $serv = shift(@all_args);
         my @servers_loop = ($serv);
         if ($serv eq "all") {

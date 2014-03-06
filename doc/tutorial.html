@@ -1,11 +1,12 @@
 <h1 id="gim-tutorial">gim tutorial</h1>
-<p>In this tutorial we will start a new NONMEM/PsN modeling project with gim from scratch. The tutorial assumes you have <code>gim</code> and <code>git</code> installed, using the installation guide.</p>
+<p>In this tutorial we will start a new NONMEM/PsN modeling project with gim from scratch, and explain the intended workflow. The tutorial assumes you have <code>gim</code> and <code>git</code> installed, please have a look at the installation guide if you have not done so yet.</p>
 <h2 id="initialization">Initialization</h2>
-<p>First, we'll create a folder and initialize gim. Choose your foldername wisely as gim assumes it is the same as the name of your git repository in the cloud.</p>
+<p>First, we'll create a folder for our new project and initialize gim:</p>
 <pre><code>cd ~/projects
 mkdir proj_x
 cd proj_x</code></pre>
-<p>Next, we will need to create the Git repository and hook it up to a git cloud service such as GitHub or BitBucket. For this, go to the respective website (e.g. github.com) and create a new repository, with the same name as you used for the folder name (e.g. <code>proj_x</code>). We then initiate our git repository on the local machine and link it to the cloud. Assuming you use BitBucket for your project:</p>
+<p>Next, we will need to create the repository and hook it up to a git cloud service such as GitHub or BitBucket. For this, go to the respective website (e.g. github.com, bitbucket.com) and create a new repository, with the same name as you used for the folder name (e.g. <code>proj_x</code>). If you don't have an account at one of these services you will obviously need to create one first.</p>
+<p>We can then initiate our git repository on the local machine and link it to the cloud. Assuming you use BitBucket for your project:</p>
 <pre><code>gim init bitbucket</code></pre>
 <p>or for GitHub:</p>
 <pre><code>gim init github</code></pre>
@@ -13,5 +14,51 @@ cd proj_x</code></pre>
 <p>You should see this in your console:</p>
 <pre><code>gim: creating new git repository in current folder.
 gim: done.</code></pre>
-<p>Now you are set to go. You can add models and datasets to the folder and start modeling.</p>
-<h2 id="workflow">Workflow</h2>
+<p>Now you are set to go!</p>
+<h2 id="a-first-commit">A first commit</h2>
+<p>Before you start modeling you probably want to add some files to the folder, like datasets or pdf files. Let's do that, and then do a first synchronization to the cloud. So after adding some files, save your work to the cloud with:</p>
+<pre><code>gim sync</code></pre>
+<p>It may be that the first time you run this command, <code>gim</code> will have to do some extra work (save the git server as a known host), but in principle the output should look something like:</p>
+<pre><code>$ gim sync
+gim: pulling changes from central (git@bitbucket.com:ronkeizer/proj_x)
+gim: git added 4 files to repository (localhost_name)
+gim: changes pushed to remote</code></pre>
+<p>What <code>gim</code> is doing is first to look for any new stuff on the central git repository (there is none now) and update the local repository if needed. Afterwards it will save the updates and new files to the central repository. If you now go to the GitHub or BitBucket website and look in your repository, you should see the commit you just made and the new files.</p>
+<p>If we try to synchronize again afterwards, <code>gim</code> should report that there are no new changes (locally or remote).</p>
+<pre><code>$ gim sync
+gim: pulling files from central (git@bitbucket.com:ronkeizer/proj_x)
+gim: no new files or changes found
+gim: everything up-to-date</code></pre>
+<h2 id="duplicate-project">Duplicate project</h2>
+<p>Let's say now we want to continue working on another computer. We can then just do basically the same steps, only now <code>gim</code> will automatically 'pull' in the files from the cloud:</p>
+<pre><code>mkdir proj_x
+cd proj_x
+gim init
+gim link bitbucket proj_x
+gim sync</code></pre>
+<p>which will give:</p>
+<pre><code>gim: pulling changes from central (git@bitbucket.com:ronkeizer/proj_x)
+gim: no new files or changes found locally
+gim: everything up-to-date</code></pre>
+<h2 id="running-models-local">Running models (local)</h2>
+<p>When you have created your first model, you can run it on your local machine normally using:</p>
+<pre><code>execute run1.mod</code></pre>
+<p><em>Note:</em> <code>gim</code> can currently only handle model execution using PsN, and not using <code>nmfe</code>.</p>
+<p>You can also route the execution through <code>gim</code>:</p>
+<pre><code>gim execute run1.mod</code></pre>
+<p>This has the advantage that it will first look if there is a newer version of the model in the central repository. Then it will run the model, and afterwards it will push the new result files to the central repository. In effect, it is thus similar to:</p>
+<pre><code>gim sync
+execute run1.mod
+gim sync</code></pre>
+<p>If you don't want to check / update the central repository everytime you run a model, it is probably faster to only use <code>gim</code> when you stop working on the project for the day, or after you've made some important progress.</p>
+<h2 id="running-models-remote">Running models (remote)</h2>
+<p>The big advantage of using <code>gim</code> is not in running models local, but in the ease in which you can run models on a cluster or in the cloud. After we have defined our cluster in the <code>settings.json</code> file, the only thing we have to do is specify the desired cluster to run on, and <code>gim</code> will take care of the rest.</p>
+<pre><code>gim amz execute run1.mod</code></pre>
+<p>will execute <code>run1.mod</code> in the cloud (<code>amz</code>, e.g. an Amazon EC2 instance). The output should look e.g. like this:</p>
+<pre><code>$ gim amz execute run1.mod
+gim: changes pushed to remote
+gim (@amz): git repository found
+gim (@amz): starting PsN (execute run1.mod)
+gim (@amz): done.
+gim: done.</code></pre>
+<h2 id="checking-run-status">Checking run status</h2>

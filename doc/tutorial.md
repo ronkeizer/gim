@@ -41,7 +41,6 @@ Before you start modeling you probably want to add some files to the folder, lik
 It may be that the first time you run this command, `gim` will have to do some extra work (save the git server as a known host), but in principle the output should look something like:
 
     $ gim sync
-    gim: starting synchronize
     gim: pulling changes from central (git@bitbucket.com:ronkeizer/proj_x)
     gim: git added 4 files to repository (localhost_name)
     gim: changes pushed to remote
@@ -51,7 +50,6 @@ What `gim` is doing is first to look for any new stuff on the central git reposi
 If we try to synchronize again afterwards, `gim` should report that there are no new changes (locally or remote).
 
     $ gim sync
-    gim: synchronizing
     gim: pulling files from central (git@bitbucket.com:ronkeizer/proj_x)
     gim: no new files or changes found
     gim: everything up-to-date
@@ -69,7 +67,6 @@ Let's say now we want to continue working on another computer. We can then just 
 
 which will give:
 
-    gim: starting synchronize
     gim: pulling changes from central (git@bitbucket.com:ronkeizer/proj_x)
     gim: no new files or changes found locally
     gim: everything up-to-date
@@ -95,8 +92,9 @@ This has the advantage that it will first look if there is a newer version of th
 
 If you don't want to check / update the central repository everytime you run a model, it is probably faster to only use `gim` when you stop working on the project for the day, or after you've made some important progress.
 
-Running models (local)
-----------------------
+
+Running models (remote)
+-----------------------
 
 The big advantage of using `gim` is not in running models local, but in the ease in which you can run models on a cluster or in the cloud. After we have defined our cluster in the `settings.json` file, the only thing we have to do is specify the desired cluster to run on, and `gim` will take care of the rest.
 
@@ -110,6 +108,7 @@ will execute `run1.mod` in the cloud (`amz`, e.g. an Amazon EC2 instance). The o
     gim (@amz): starting PsN (execute run1.mod)
     gim (@amz): done.
     gim: done.
+
 
 Checking run status
 -------------------
