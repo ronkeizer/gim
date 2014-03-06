@@ -40,7 +40,7 @@ sub msg {
    my ($msg, $as_remote) = @_;
    $msg = $msg."\n";
    my $flag = 0;
-   unless ($as_remote eq "" || $as_remote == 0) {
+   unless ($as_remote eq "") {
        print colored (['blue'], "gim (@".$as_remote."): ");
     } else {
        print colored (['green'], "gim: ");
