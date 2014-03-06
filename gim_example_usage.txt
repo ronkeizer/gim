@@ -32,3 +32,7 @@ Examples of usage:
     # on all specified servers
     gim init 
     gim sync
+
+    # link to repository at GitHub or BitBucket
+    gim link github project1
+    gim link bitbucket project1

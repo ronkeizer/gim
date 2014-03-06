@@ -16,7 +16,7 @@ BEGIN{
    my $base_dir = &File::Basename::dirname(realpath($0));
    push (@INC, $base_dir);
 }
-use modules::gim qw(read_settings extract_repo_id_from_url msg git_add_commit git_get_origin git_get_status git_add_origin git_push git_pull github_form_url);
+use modules::gim qw(read_settings extract_repo_id_from_url msg git_add_commit git_get_origin git_get_status git_add_origin git_push git_pull github_form_url ssh_check_known_host_from_git_url ssh_add_known_host get_ip_from_name);
 use modules::aws qw(start_instance);
 my $base_dir = &File::Basename::dirname(realpath($0));
 my $ini_dir = $ENV{HOME}."/.gim";
@@ -43,7 +43,7 @@ if ($key eq "help") {
 }
 my @gim_args = qw/as_remote cmd_prefix force/;
 my @gim_cmds = qw/init clone sync status link setup servers tunnel qstat/;
-my @psn_cmds = qw/do_psn execute bootstrap vpc/;
+my @psn_cmds = qw/do_psn execute bootstrap vpc llp qstat/;
 my @all_cmd;
 #push (@all_cmd, @gim_cmd, @psn_cmd);
 my $psn_cmd; my $gim_cmd; my $local = 0; my $loc_id; my $server_id; my @set_args;
@@ -270,13 +270,16 @@ if ($gim_cmd ne "") {
         exit;
     }
     if ($gim_cmd eq "sync") {
-        msg ("synchronizing", $arg{as_remote});
+        msg ("starting synchronize", $arg{as_remote});
         my $serv = shift(@all_args);
         my @servers_loop = ($serv);
         if ($serv eq "all") {
             @servers_loop = @servers;
         }
         if ($serv eq "") { # local
+            my $origin = git_get_origin ($r);
+            my $origin_url = $origin -> {origin};
+            ssh_check_known_host_from_git_url($origin_url, $arg{as_remote});
             git_pull($r, $arg{as_remote});
             git_add_commit($r, $arg{as_remote});
             git_push($r, $arg{as_remote});
@@ -306,13 +309,14 @@ if ($gim_cmd ne "") {
         exit;
     }
     if ($gim_cmd eq "link") {
+        my $host = shift(@all_args);
         my $repo = shift(@all_args);
-        $repo =~ s/\s\r\n//g;
-        unless($repo eq "") {
-            git_add_origin($r, $git_remote, $repo, 0, 0);
+        if ($host eq "" || $repo eq "") {
+            msg("[error] either host or repository name not specified.", $arg{as_remote} );
+            exit;            
         } else {
-            msg("no repo name specified.",$arg{as_remote} );
-            exit;
+            $repo =~ s/\s\r\n//g;
+            git_add_origin($r, $git_remote, $host, $repo, 0, "");
         }
     }
     if ($gim_cmd ne "") {

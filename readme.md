@@ -53,6 +53,10 @@ Some example commands
     gim init 
     gim sync
 
+    # set/change link to repository at GitHub or BitBucket
+    gim link github project1
+    gim link bitbucket project1
+
 
 Advantages / use cases
 ----------------------

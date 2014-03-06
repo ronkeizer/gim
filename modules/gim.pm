@@ -9,10 +9,11 @@ use Sys::Hostname;
 use POSIX qw(strftime);
 use Capture::Tiny ':all';
 use JSON::PP;
+use Socket;
 require Exporter;
 
 our @ISA = qw(Exporter);
-our @EXPORT_OK = qw(read_settings extract_repo_id_from_url msg git_add_commit git_get_origin git_get_status git_add_origin git_push git_pull github_form_url);
+our @EXPORT_OK = qw(read_settings extract_repo_id_from_url msg git_add_commit git_get_origin git_get_status git_add_origin git_push git_pull github_form_url ssh_check_known_host_from_git_url ssh_add_known_host get_ip_from_name);
 
 sub read_settings {
     my $file = shift;
@@ -39,7 +40,7 @@ sub msg {
    my ($msg, $as_remote) = @_;
    $msg = $msg."\n";
    my $flag = 0;
-   if ($as_remote ne "") {
+   unless ($as_remote eq "" || $as_remote == 0) {
        print colored (['blue'], "gim (@".$as_remote."): ");
     } else {
        print colored (['green'], "gim: ");
@@ -69,7 +70,7 @@ sub git_add_commit {
     my @cmd = ("commit", "-a", "-m '".$m."'");
     my $output = $r -> run (@cmd);
     if ($output =~ m/nothing to commit/) {
-        msg("no new files or changes found", $as_remote);
+        msg("no new files or changes found locally", $as_remote);
        return(0);
      } else {
         my $n_add =()= $output =~ /create mode/gi;
@@ -116,15 +117,19 @@ sub git_get_status {
 
 
 sub git_add_origin {
-    my ($r, $git_remote, $repo, $flag, $as_remote) = @_;
+    my ($r, $git_remote, $git_host, $repo, $flag, $as_remote) = @_;
     my $origin = git_get_origin ($r);
     if ($origin -> {origin} eq "") { # test if not already linked
         if ($repo eq "") {
             msg ("[error] no repo name specified!", $as_remote);  
             exit;          
         }
-        $git_remote -> {repo} = $repo;
-        my $new_link = github_form_url($git_remote); 
+        if ($git_remote -> {$git_host} eq "") {
+            msg ("[error] git server id unknown! check ~/.gim/settings.json", $as_remote);  
+            exit;              
+        }
+        $git_remote -> {$git_host} -> {repo} = $repo;
+        my $new_link = github_form_url($git_remote, $git_host); 
         my @cmd = ("remote", "add", "origin", $new_link);
         my $output = $r -> run (@cmd);
         msg("linking local repository to remote (".$repo.")", $as_remote);
@@ -134,7 +139,7 @@ sub git_add_origin {
             msg("removing remote link and trying again...", $as_remote);
             my @cmd = ("remote", "remove", "origin");
             my $output = $r -> run (@cmd);    
-            git_add_origin($r, $git_remote, $repo, 1, $as_remote)
+            git_add_origin($r, $git_remote, $git_host, $repo, 1, $as_remote)
         }
         exit;
     } 
@@ -150,7 +155,6 @@ sub git_add_origin {
 sub git_push {
     my ($r, $as_remote) = @_;
     my $origin = git_get_origin ($r);
-    msg("pushing files to cloud (".$origin -> {origin}.")", $as_remote);
     my $options = { "fatal" => [ -128 ] };    #    quiet => true };
     my @cmd = ("push", "-u", "origin", "master", $options);
     my ($stdout, $stderr, @result) = capture {
@@ -188,19 +192,61 @@ sub git_push {
 sub git_pull {
     my ($r, $as_remote) = @_;
     my $origin = git_get_origin ($r);
-    msg("pulling files (".$origin -> {origin}.")", $as_remote);
+    msg("pulling changes from central (".$origin -> {origin}.")", $as_remote);
     my $options = { "fatal" => [ -128 ] };    #    quiet => true };
     my @cmd = ("pull", "origin", "master");
     my ($stdout, $stderr, @result) = capture {
       $output = $r -> run (@cmd);
+      print $stdout;
     };  
 }
 
 sub github_form_url {
-    my $gh = shift;
-    my $remote = $gh -> {url}.":".$gh -> {user}."/".$gh -> {repo};
+    my ($gh, $host) = @_;
+    my $remote = $gh -> {$host} -> {url}.":".$gh -> {$host} -> {user}."/".$gh -> {$host} -> {repo};
     return($remote);
 }
+
+sub ssh_check_known_host_from_git_url {
+    my ($url, $as_remote) = @_;
+    $url =~ m/\@(.*?)\:/;
+    my $host = $1;
+    # print("remote host: $host");
+
+    open (IN, "<".$ENV{"HOME"}."/.ssh/known_hosts");
+    my @lines = <IN>;
+    my $text = join ("", @lines);
+    close IN;
+    if ($text =~ m/$host/i) {
+        #msg("central git-repository (@".$host.") known host", $as_remote);
+    } else {
+        msg("unknown host (".$host."), trying to add to known host file...", $as_remote);
+        ssh_add_known_host($host);
+    }
+}
+
+sub ssh_add_known_host {
+    my ($host, $as_remote) = @_;
+    my $ip = get_ip_from_name($host);
+    my @commands = (
+      "ssh-keygen -R ".$host,
+      "ssh-keygen -R ".$ip,
+      "ssh-keygen -R ".$host.",".$ip,
+      "ssh-keyscan ".$host.",".$ip." >> ~/.ssh/known_hosts",
+      "ssh-keyscan ".$ip." >> ~/.ssh/known_hosts",
+      "ssh-keyscan ".$host." >> ~/.ssh/known_hosts");
+    msg("adding ".$host." to known hosts (if not already)");
+    foreach my $cmd(@commands) {
+        system $cmd;
+    }
+}
+
+sub get_ip_from_name {
+    my $name = shift;
+    my $packed_ip = gethostbyname($name); 
+    return(inet_ntoa($packed_ip));
+}
+
 
 
 1;
