@@ -224,7 +224,7 @@ if ($gim_cmd ne "") {
     }
     if ($gim_cmd eq "qstat") {
         msg("running jobs: ", $arg{as_remote});
-	    system("hostname; qstat -s r");
+	    system("qstat -s r");
         msg("scheduled jobs: ", $arg{as_remote});
 	    system("qstat -s z");
 	    exit;
