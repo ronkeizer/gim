@@ -42,7 +42,9 @@ if ($key eq "help") {
     exit;
 }
 my @gim_args = qw/as_remote cmd_prefix force/;
-my @gim_cmds = qw/init clone sync status link setup servers tunnel qstat/;
+my @sge_cmds = qw/qstat qhost/;
+my @gim_cmds = qw/init clone sync status link setup servers tunnel/;
+push (@gim_cmds, @sge_cmds);
 my @psn_cmds = qw/do_psn execute bootstrap vpc llp/;
 my @all_cmd;
 #push (@all_cmd, @gim_cmd, @psn_cmd);
@@ -222,7 +224,7 @@ if ($gim_cmd ne "") {
         msg("done.", $arg{as_remote} );
         exit;
     }
-    if ($gim_cmd eq "qstat") {
+    if ($gim_cmd ~~ @sge_cmds) {
         msg("running jobs: ", $arg{as_remote});
 	    system("qstat -s r");
         msg("scheduled jobs: ", $arg{as_remote});
@@ -350,7 +352,7 @@ if ($gim_cmd eq "") {
 
 # RK: Should we do a pull? probably not, unless you also work in the cloud. Make setting for this.
 #    git_pull ($r, $arg{as_remote});
-    unless ("qstat" ~~ @all_args) {
+    unless ($gim_cmd ~~ @sge_cmds) {
     	if ($arg{as_remote} eq "") {
 	       git_add_commit ($r, $arg{as_remote});
 	       my $status = git_get_status($r, $arg{as_remote});

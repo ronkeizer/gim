@@ -1,0 +1,17 @@
+<h1 id="gim-tutorial">gim tutorial</h1>
+<p>In this tutorial we will start a new NONMEM/PsN modeling project with gim from scratch. The tutorial assumes you have <code>gim</code> and <code>git</code> installed, using the installation guide.</p>
+<h2 id="initialization">Initialization</h2>
+<p>First, we'll create a folder and initialize gim. Choose your foldername wisely as gim assumes it is the same as the name of your git repository in the cloud.</p>
+<pre><code>cd ~/projects
+mkdir proj_x
+cd proj_x</code></pre>
+<p>Next, we will need to create the Git repository and hook it up to a git cloud service such as GitHub or BitBucket. For this, go to the respective website (e.g. github.com) and create a new repository, with the same name as you used for the folder name (e.g. <code>proj_x</code>). We then initiate our git repository on the local machine and link it to the cloud. Assuming you use BitBucket for your project:</p>
+<pre><code>gim init bitbucket</code></pre>
+<p>or for GitHub:</p>
+<pre><code>gim init github</code></pre>
+<p><em>Note:</em> Other git servers can be defined in your setup file (<code>~/.gim/settings.json</code>).</p>
+<p>You should see this in your console:</p>
+<pre><code>gim: creating new git repository in current folder.
+gim: done.</code></pre>
+<p>Now you are set to go. You can add models and datasets to the folder and start modeling.</p>
+<h2 id="workflow">Workflow</h2>
