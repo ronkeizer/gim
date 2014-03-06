@@ -230,7 +230,7 @@ if ($gim_cmd ne "") {
         msg("scheduled jobs: ", $arg{as_remote});
 	    system("qstat -s p");
         msg("recently finished jobs: ", $arg{as_remote});
-        system("qstat -s p");
+        system("qstat -s z");
 	    exit;
     }
     if ($gim_cmd eq "status") {
@@ -367,10 +367,19 @@ if ($gim_cmd eq "") {
     	$psn_cmd = $ini -> {"psn"} -> {"prefix"} . " " . $psn_cmd;
     }
     if ($local) {
+	if (-e "foo.err") {
+	    open (ERR, "<foo.err");
+	    my @lines = <ERR>;
+	    close ERR;
+	    msg("[warning] last job resulted in an error: ", $arg{as_remote});
+	    print @lines;
+	    unlink("foo.err");
+	}
         # msg("running on local machine: ".$psn_cmd."\n",$arg{as_remote} );
         if ($arg{as_remote} ne "") {
             msg("starting PsN (".$psn_cmd.")", $arg{as_remote});
     	    system ('nohup nice '.$psn_cmd.' > foo.out 2> foo.err < /dev/null &');
+
     	    sleep (1);
         } else {
             open (OUT, $psn_cmd . " | ");
