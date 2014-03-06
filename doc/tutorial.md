@@ -111,3 +111,5 @@ will execute `run1.mod` in the cloud (`amz`, e.g. an Amazon EC2 instance). The o
     gim (@amz): done.
     gim: done.
 
+Checking run status
+-------------------

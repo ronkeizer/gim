@@ -1,8 +1,14 @@
 { 
   "_comment": "Settings for git need to be defined both on local machine and remote machines",
   "git": {
-    "user": "ronkeizer",
-    "url": "git@github.com"
+    "github": {
+      "user": "ronkeizer",
+      "url": "git@github.com"
+    },
+    "bitbucket": {
+      "user": "ronkeizer",
+      "url": "git@bitbucket.com"
+    }
   },
   "_comment": "The servers are defined below, and only need to be defined on the local machine.",
   "servers" : {

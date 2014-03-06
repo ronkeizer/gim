@@ -67,7 +67,7 @@ sub git_add_commit {
     $host =~ s/\.local//;
     my $now = strftime "%Y%m%d_%H:%M:%S", localtime;
     my $m = $host."_".$now;
-    my @cmd = ("commit", "-a", "-m '".$m."'");
+    my @cmd = ("commit", "--all", "-m '".$m."'");
     my $output = $r -> run (@cmd);
     if ($output =~ m/nothing to commit/) {
         msg("no new files or changes found locally", $as_remote);
