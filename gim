@@ -188,6 +188,14 @@ if ($arg{as_remote} eq "") {
 ################################################################################################
 ## Run gim command if specified
 ################################################################################################
+sub run_cmd_capture_output {
+    my $cmd = shift;
+    open (OUT, $cmd . " |");
+    my @lines = <OUT>;
+    close (OUT);
+    my $output = join ("", @lines);
+    return($output);
+}
 
 if ($gim_cmd ne "") {
     shift(@all_args);
@@ -225,13 +233,28 @@ if ($gim_cmd ne "") {
         exit;
     }
     if ($gim_cmd ~~ @sge_cmds) {
-        msg("running jobs: ", $arg{as_remote});
-	    system("qstat -s r");
-        msg("scheduled jobs: ", $arg{as_remote});
-	    system("qstat -s p");
-        msg("recently finished jobs: ", $arg{as_remote});
-        system("qstat -s z");
-	    exit;
+	my $running = run_cmd_capture_output("qstat -s r");
+	my $scheduled = run_cmd_capture_output("qstat -s p");
+	my $finished = run_cmd_capture_output("qstat -s z");
+	if ($running ne "") {
+	    msg("running jobs: ", $arg{as_remote});
+	    print $running;
+	} else {
+	    msg("no running jobs.", $arg{as_remote});
+	}
+	if ($scheduled ne "") {
+	    msg("scheduled jobs: ", $arg{as_remote});
+	    print $scheduled;
+	} else {
+	    msg("no scheduled jobs.", $arg{as_remote});
+	}
+	if ($finished ne "") {
+	    msg("recently finished jobs: ", $arg{as_remote});
+	    print $finished;
+	} else {
+	    msg("no recently finished jobs.", $arg{as_remote});
+	}
+	exit;
     }
     if ($gim_cmd eq "status") {
         my $serv = shift(@all_args);
@@ -363,8 +386,14 @@ if ($gim_cmd eq "") {
     }
 
     my $psn_cmd = join (" ", @all_args);
-    if ($ini -> {"psn"} -> {"prefix"} ne "") {
-    	$psn_cmd = $ini -> {"psn"} -> {"prefix"} . " " . $psn_cmd;
+    if ($ini -> {"servers"} -> {$arg{as_remote}} -> {"psn"} -> {"arguments"} ne "") {
+       my $arg = $ini -> {"servers"} -> {$arg{as_remote}} -> {"psn"} -> {"arguments"} ;
+       my @cmd = split(/\s/, $psn_cmd);
+       my $root_cmd = shift(@cmd);
+       $psn_cmd = $root_cmd . " ". $arg . " ". join (" ", @cmd); 
+    }
+    if ($ini -> {"servers"} -> {$arg{as_remote}} -> {"psn"} -> {"prefix"} ne "") {
+    	$psn_cmd = $ini ->  {"servers"} -> {$arg{as_remote}} -> {"psn"} -> {"prefix"} . " " . $psn_cmd;
     }
     if ($local) {
 	if (-e "foo.err") {
@@ -378,8 +407,8 @@ if ($gim_cmd eq "") {
         # msg("running on local machine: ".$psn_cmd."\n",$arg{as_remote} );
         if ($arg{as_remote} ne "") {
             msg("starting PsN (".$psn_cmd.")", $arg{as_remote});
+#    	    print ('nohup nice '.$psn_cmd.' > foo.out 2> foo.err < /dev/null &');
     	    system ('nohup nice '.$psn_cmd.' > foo.out 2> foo.err < /dev/null &');
-
     	    sleep (1);
         } else {
             open (OUT, $psn_cmd . " | ");
