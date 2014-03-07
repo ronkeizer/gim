@@ -1,12 +1,12 @@
 gim
 ===
 
-`gim` (GIt for Modeling) is a wrapper script that facilitates distribution and synchronization of models and results between the local computer and remote servers/clouds. It is initially aimed at PsN/NONMEM, but will later be extended to other modeling tools as well.
+`gim` (GIt for Modeling) is a wrapper script that facilitates synchronization of pharmacometric models and results between the local computer and remote servers/clouds. It is initially aimed at PsN/NONMEM, but might be extended to other modeling tools as well. 
 
 
 The problem that `gim` solves
 -----------------------------
-Many modelers find it a pain to constantly move files between the local computer and a cluster or a cloud server. Modeling only on a local computer is usually not an option due to limited CPU capacity. On the other hand, modeling only in the cloud is not always considered convenient either: although some excellent cloud tools are available (like RStudio Server, PiranaJS), many modelers find it more convenient to parse results and datasets on their local machine. Also, cluster administrators may not allow installation of specific custom tools or libraries, and modeling on a cluster always requires a connection to the internet. `gim` solves these problems by performing 'on-the-fly' transfer of models and results between your local computer and the cloud / cluster. At the same time it provides automatic backup and version control of your work in the cloud.
+Many pharmacometric modelers find it a pain to constantly move files between the local computer and a cluster or a cloud server. Modeling only on a local computer is usually not an option due to limited CPU capacity. On the other hand, modeling on a cluster/cloud is not always convenient either: although some excellent cloud tools are available (like RStudio Server, PiranaJS), many modelers find it more convenient to parse results and datasets on their local machine. Also, cluster administrators may not allow installation of specific custom tools or libraries, and remote modeling of course always requires a connection to the internet. `gim` solves these problems by performing 'on-the-fly' transfer of models and results between your local computer and the cloud / cluster using Git. At the same time it provides automatic backup and version control of your work in the cloud.
 
 
 The mechanism
@@ -57,6 +57,7 @@ Some example commands
     gim link github project1
     gim link bitbucket project1
 
+A short tutorial is available in `/doc`.
 
 Advantages / use cases
 ----------------------
@@ -66,14 +67,16 @@ Advantages / use cases
 - Automatic version control on all models and results
 - No wait when cluster is down, just sync your project to a different cloud/cluster
 - Easily share projects with colleagues
-- Integrates with Pirana and PiranaJS
-
+- Integrates with Pirana (desktop version). Fully compatible with PiranaJS.
 
 Requirements
 ------------
 - PsN, NONMEM, and `gim` and `git` need to be installed both locally and on the servers.
 - GitHub account or custom Git server account
 
+Installation guide
+------------------
+Follows soon....
 
 License
 -------
