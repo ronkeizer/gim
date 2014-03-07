@@ -236,7 +236,7 @@ if ($gim_cmd ne "") {
 	if (@all_args[0] eq "pirana") {
 	    my $users = "";
 	    if (@all_args[1] eq "all") {
-		$users = "-u *.* ";
+		$users = '-u "*" ';
 	    }
 	    my $all = run_cmd_capture_output("echo :P:running_jobs:; qstat ".$users."-s r; echo :P:scheduled_jobs:; qstat ".$users."-s p; echo :P:finished_jobs:; qstat ".$users."-s z;echo :P:node_info:; qhost;echo :P:node_use:; qstat -g c;echo :P:end:;");
 	    print $all;
