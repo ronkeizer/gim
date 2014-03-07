@@ -42,6 +42,9 @@ Some example commands
     # Check if any results are available on server 'serv1'
     gim status serv1
 
+    # Check SGE status on cloud
+    gim amz qstat
+
     # Look for new models/results on all servers, and synchronize
     gim sync
 

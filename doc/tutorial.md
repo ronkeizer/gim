@@ -112,3 +112,6 @@ will execute `run1.mod` in the cloud (`amz`, e.g. an Amazon EC2 instance). The o
 
 Checking run status
 -------------------
+
+    gim amz qstat
+

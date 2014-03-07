@@ -25,6 +25,9 @@ Examples of usage:
     # Check if any results are available on server 'serv1'
     gim status serv1
 
+    # Check SGE status on cloud
+    gim amz qstat
+
     # Look for new models/results on 'serv1' and synchronize 
     gim sync serv1
 
