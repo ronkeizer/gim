@@ -155,6 +155,14 @@ if ($arg{as_remote} eq "") {
 ## Initialize Git repo, save changes if necessary, push to remote
 ################################################################################################
 
+    ## copy gitignore template if no gitignore file present
+    unless(-e $cwd."/.gitignore") {
+        if (-e $base_dir."/gitignore_template") {
+            msg("copied gitignore template file", $arg{as_remote});
+            copy($base_dir."/gitignore_template", $cwd."/.gitignore");
+        }
+    }
+
 # unless(exists_in_array($gim_cmd, ["qstat"])) {
     our $cwd = ".";
     my $dir = $cwd;
