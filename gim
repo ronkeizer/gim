@@ -155,14 +155,6 @@ if ($arg{as_remote} eq "") {
 ## Initialize Git repo, save changes if necessary, push to remote
 ################################################################################################
 
-    ## copy gitignore template if no gitignore file present
-    unless(-e $cwd."/.gitignore") {
-        if (-e $base_dir."/gitignore_template") {
-            msg("copied gitignore template file", $arg{as_remote});
-            copy($base_dir."/gitignore_template", $cwd."/.gitignore");
-        }
-    }
-
 # unless(exists_in_array($gim_cmd, ["qstat"])) {
     our $cwd = ".";
     my $dir = $cwd;
@@ -241,26 +233,31 @@ if ($gim_cmd ne "") {
         exit;
     }
     if ($gim_cmd ~~ @sge_cmds) {
-	my $running = run_cmd_capture_output("qstat -s r");
-	my $scheduled = run_cmd_capture_output("qstat -s p");
-	my $finished = run_cmd_capture_output("qstat -s z");
-	if ($running ne "") {
-	    msg("running jobs: ", $arg{as_remote});
+	if (@all_args[0] eq "pirana") {
+	    my $all = run_cmd_capture_output("echo :P:running_jobs:; qstat -s r; echo :P:scheduled_jobs:; qstat -s p; echo :P:finished_jobs:; qstat -s z;echo :P:node_info:; qhost;echo :P:node_use:; qstat -g c;echo :P:end:;");
 	    print $running;
 	} else {
-	    msg("no running jobs.", $arg{as_remote});
-	}
-	if ($scheduled ne "") {
-	    msg("scheduled jobs: ", $arg{as_remote});
-	    print $scheduled;
-	} else {
-	    msg("no scheduled jobs.", $arg{as_remote});
-	}
-	if ($finished ne "") {
-	    msg("recently finished jobs: ", $arg{as_remote});
-	    print $finished;
-	} else {
-	    msg("no recently finished jobs.", $arg{as_remote});
+	    my $running = run_cmd_capture_output("qstat -s r");
+	    my $scheduled = run_cmd_capture_output("qstat -s p");
+	    my $finished = run_cmd_capture_output("qstat -s z");
+	    if ($running ne "") {
+		msg("running jobs: ", $arg{as_remote});
+		print $running;
+	    } else {
+		msg("no running jobs.", $arg{as_remote});
+	    }
+	    if ($scheduled ne "") {
+		msg("scheduled jobs: ", $arg{as_remote});
+		print $scheduled;
+	    } else {
+		msg("no scheduled jobs.", $arg{as_remote});
+	    }
+	    if ($finished ne "") {
+		msg("recently finished jobs: ", $arg{as_remote});
+		print $finished;
+	    } else {
+		msg("no recently finished jobs.", $arg{as_remote});
+	    }
 	}
 	exit;
     }
