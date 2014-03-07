@@ -235,7 +235,7 @@ if ($gim_cmd ne "") {
     if ($gim_cmd ~~ @sge_cmds) {
 	if (@all_args[0] eq "pirana") {
 	    my $all = run_cmd_capture_output("echo :P:running_jobs:; qstat -s r; echo :P:scheduled_jobs:; qstat -s p; echo :P:finished_jobs:; qstat -s z;echo :P:node_info:; qhost;echo :P:node_use:; qstat -g c;echo :P:end:;");
-	    print $running;
+	    print $all;
 	} else {
 	    my $running = run_cmd_capture_output("qstat -s r");
 	    my $scheduled = run_cmd_capture_output("qstat -s p");
