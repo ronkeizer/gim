@@ -217,7 +217,7 @@ sub ssh_check_known_host_from_git_url {
     my $text = join ("", @lines);
     close IN;
     if ($text =~ m/$host/i) {
-        #msg("central git-repository (@".$host.") known host", $as_remote);
+        msg("central git-repository (@".$host.") known host", $as_remote);
     } else {
         msg("unknown host (".$host."), trying to add to known host file...", $as_remote);
         ssh_add_known_host($host);
@@ -228,14 +228,15 @@ sub ssh_add_known_host {
     my ($host, $as_remote) = @_;
     my $ip = get_ip_from_name($host);
     my @commands = (
-      "ssh-keygen -R ".$host,
-      "ssh-keygen -R ".$ip,
-      "ssh-keygen -R ".$host.",".$ip,
-      "ssh-keyscan ".$host.",".$ip." >> ~/.ssh/known_hosts",
-      "ssh-keyscan ".$ip." >> ~/.ssh/known_hosts",
-      "ssh-keyscan ".$host." >> ~/.ssh/known_hosts");
+        "ssh-keygen -R ".$host,
+        "ssh-keygen -R ".$ip,
+	"ssh-keygen -R ".$host.",".$ip,
+      "ssh-keyscan ".$host.",".$ip." >> /netapp/home/ron/.ssh/known_hosts",
+      "ssh-keyscan ".$ip." >> /netapp/home/ron/.ssh/known_hosts",
+      "ssh-keyscan ".$host." >> /netapp/home/ron/.ssh/known_hosts");
     msg("adding ".$host." to known hosts (if not already)");
     foreach my $cmd(@commands) {
+	print $cmd;
         system $cmd;
     }
 }
