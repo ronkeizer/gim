@@ -306,6 +306,7 @@ if ($gim_cmd ne "") {
         exit;
     }
     if ($gim_cmd eq "sync") {
+        my $out;
 #        msg ("starting synchronize", $arg{as_remote});
         my $serv = shift(@all_args);
         my @servers_loop = ($serv);
@@ -336,13 +337,22 @@ if ($gim_cmd ne "") {
                 open (OUT, $ssh_cmd ." ". $cmd . " | ");
                 while (my $line = <OUT>) {
                     print $line;
+                    $line =~ s/\e\[[\d;]*[a-zA-Z]//g;
+                    chomp($line);
+                    $out .= $line;
                 }
             }
         }
         if ($arg{as_remote} eq "") {
             git_pull ($r, $arg{as_remote});
         }
-        exit;
+        if($out =~ m/no new files/gi) {
+            exit;
+        } else {
+            msg("changes were found on the remote server, synchronizing...");
+            git_pull($r, $arg{as_remote});
+            exit;
+        }
     }
     if ($gim_cmd eq "link") {
         my $host = shift(@all_args);
