@@ -307,12 +307,13 @@ if ($gim_cmd ne "") {
     }
     if ($gim_cmd eq "sync") {
         my $out;
-#        msg ("starting synchronize", $arg{as_remote});
+       msg ("starting synchronize0", $arg{as_remote});
         my $serv = shift(@all_args);
         my @servers_loop = ($serv);
         if ($serv eq "all") {
             @servers_loop = @servers;
         }
+       msg ("starting synchronize1", $arg{as_remote});
         if ($serv eq "") { # local
             my $origin = git_get_origin ($r);
             my $origin_url = $origin -> {origin};
@@ -322,6 +323,7 @@ if ($gim_cmd ne "") {
             git_push($r, $arg{as_remote});
             exit;
         }
+       msg ("starting synchronize2", $arg{as_remote});
         foreach my $server_id (@servers_loop) {
             if ($server_id ne "") {
                 msg("connecting to ".$server_id, $arg{as_remote});
@@ -336,7 +338,6 @@ if ($gim_cmd ne "") {
                 my $cmd = '"cd '.$server -> {repository_location}.'; mkdir -p '.$repo.'; cd '.$repo.'; '.$server -> {gim_location}.'/gim -as_remote='.$server_id.' sync "';
                 open (OUT, $ssh_cmd ." ". $cmd . " | ");
                 while (my $line = <OUT>) {
-                    print "bla: ".$line;
                     $line =~ s/\e\[[\d;]*[a-zA-Z]//g;
                     chomp($line);
                     $out .= $line;
