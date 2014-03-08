@@ -450,17 +450,13 @@ if ($gim_cmd eq "") {
         open (OUT, $ssh_cmd ." ". $cmd . " | ");
         while (my $line = <OUT>) {
             print $line;
-
+            $out .= $line;
         }
         print $out;
         if($out =~ m/(changes pushed)|(git added)/gi) {
             msg("changes were found on the remote server, synchronizing...");
             git_pull($r, $arg{as_remote});
-            exit;
-        } else {
-            exit;
-        }
-
+        } 
     }
 }
 # print "\n";
