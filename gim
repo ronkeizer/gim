@@ -452,9 +452,8 @@ if ($gim_cmd eq "") {
             print $line;
             $out .= $line;
         }
-        print $out;
         if($out =~ m/(changes pushed)|(git added)/gi) {
-            msg("changes were found on the remote server, synchronizing...");
+            msg("changes were found on the remote server, synchronizing local data...");
             git_pull($r, $arg{as_remote});
         } 
     }
