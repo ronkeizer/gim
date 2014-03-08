@@ -336,7 +336,7 @@ if ($gim_cmd ne "") {
                 my $cmd = '"cd '.$server -> {repository_location}.'; mkdir -p '.$repo.'; cd '.$repo.'; '.$server -> {gim_location}.'/gim -as_remote='.$server_id.' sync "';
                 open (OUT, $ssh_cmd ." ". $cmd . " | ");
                 while (my $line = <OUT>) {
-                    print $line;
+                    print "bla: ".$line;
                     $line =~ s/\e\[[\d;]*[a-zA-Z]//g;
                     chomp($line);
                     $out .= $line;
