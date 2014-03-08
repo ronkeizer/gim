@@ -444,6 +444,7 @@ if ($gim_cmd eq "") {
         }
     } 
     if (!$local) {
+        print "blabla";
 #        msg("running on ".$loc_id.": ".$psn_cmd);
         my $ssh_cmd = "ssh";
         my $server = $ini -> {servers} -> {$server_id};
