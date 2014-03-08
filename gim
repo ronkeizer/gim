@@ -307,13 +307,11 @@ if ($gim_cmd ne "") {
     }
     if ($gim_cmd eq "sync") {
         my $out;
-       msg ("starting synchronize0", $arg{as_remote});
         my $serv = shift(@all_args);
         my @servers_loop = ($serv);
         if ($serv eq "all") {
             @servers_loop = @servers;
         }
-       msg ("starting synchronize1", $arg{as_remote});
         if ($serv eq "") { # local
             my $origin = git_get_origin ($r);
             my $origin_url = $origin -> {origin};
@@ -323,38 +321,30 @@ if ($gim_cmd ne "") {
             git_push($r, $arg{as_remote});
             exit;
         }
-       msg ("starting synchronize2", $arg{as_remote});
-        foreach my $server_id (@servers_loop) {
-            if ($server_id ne "") {
-                msg("connecting to ".$server_id, $arg{as_remote});
-                my $ssh_cmd = "ssh";
-                my $server = $ini -> {servers} -> {$server_id};
-                if ($server -> {key} ne "") {
-                  $ssh_cmd .= " -i ".$server -> {key};
-                }
-                $ssh_cmd .= " ".$server -> {user}. "@" . $server -> {url};
-                my $origin = git_get_origin ($r);
-                my $repo = extract_repo_id_from_url ($origin -> {origin});
-                my $cmd = '"cd '.$server -> {repository_location}.'; mkdir -p '.$repo.'; cd '.$repo.'; '.$server -> {gim_location}.'/gim -as_remote='.$server_id.' sync "';
-                open (OUT, $ssh_cmd ." ". $cmd . " | ");
-                while (my $line = <OUT>) {
-                    $line =~ s/\e\[[\d;]*[a-zA-Z]//g;
-                    chomp($line);
-                    $out .= $line;
-                }
-            }
-        }
-        if ($arg{as_remote} eq "") {
-            git_pull ($r, $arg{as_remote});
-        }
-        print $out;
-        if($out =~ m/(changes pushed)|(git added)/gi) {
-            msg("changes were found on the remote server, synchronizing...");
-            git_pull($r, $arg{as_remote});
-            exit;
-        } else {
-            exit;
-        }
+        # foreach my $server_id (@servers_loop) {
+        #     if ($server_id ne "") {
+        #         msg("connecting to ".$server_id, $arg{as_remote});
+        #         my $ssh_cmd = "ssh";
+        #         my $server = $ini -> {servers} -> {$server_id};
+        #         if ($server -> {key} ne "") {
+        #           $ssh_cmd .= " -i ".$server -> {key};
+        #         }
+        #         $ssh_cmd .= " ".$server -> {user}. "@" . $server -> {url};
+        #         my $origin = git_get_origin ($r);
+        #         my $repo = extract_repo_id_from_url ($origin -> {origin});
+        #         my $cmd = '"cd '.$server -> {repository_location}.'; mkdir -p '.$repo.'; cd '.$repo.'; '.$server -> {gim_location}.'/gim -as_remote='.$server_id.' sync "';
+        #         open (OUT, $ssh_cmd ." ". $cmd . " | ");
+        #         while (my $line = <OUT>) {
+        #             $line =~ s/\e\[[\d;]*[a-zA-Z]//g;
+        #             chomp($line);
+        #             $out .= $line;
+        #         }
+        #     }
+        # }
+        # if ($arg{as_remote} eq "") {
+        #     git_pull ($r, $arg{as_remote});
+        # }
+        # exit
     }
     if ($gim_cmd eq "link") {
         my $host = shift(@all_args);
@@ -444,7 +434,7 @@ if ($gim_cmd eq "") {
         }
     } 
     if (!$local) {
-        print "blabla";
+        my $out;
 #        msg("running on ".$loc_id.": ".$psn_cmd);
         my $ssh_cmd = "ssh";
         my $server = $ini -> {servers} -> {$server_id};
@@ -460,7 +450,17 @@ if ($gim_cmd eq "") {
         open (OUT, $ssh_cmd ." ". $cmd . " | ");
         while (my $line = <OUT>) {
             print $line;
+
         }
+        print $out;
+        if($out =~ m/(changes pushed)|(git added)/gi) {
+            msg("changes were found on the remote server, synchronizing...");
+            git_pull($r, $arg{as_remote});
+            exit;
+        } else {
+            exit;
+        }
+
     }
 }
 # print "\n";
