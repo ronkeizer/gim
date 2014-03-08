@@ -346,11 +346,12 @@ if ($gim_cmd ne "") {
         if ($arg{as_remote} eq "") {
             git_pull ($r, $arg{as_remote});
         }
-        if($out =~ m/no new files/gi) {
-            exit;
-        } else {
+        print $out;
+        if($out =~ m/(changes pushed)|(git added)/gi) {
             msg("changes were found on the remote server, synchronizing...");
             git_pull($r, $arg{as_remote});
+            exit;
+        } else {
             exit;
         }
     }
