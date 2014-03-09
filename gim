@@ -76,6 +76,7 @@ if (-e $ini_dir . "/settings.json") {
     }     
 }
 our @servers = keys (%{$ini -> {servers} });
+unshift (@servers, "local");
 my $git_remote =  $ini -> {git}; 
 
 ################################################################################################
@@ -419,7 +420,10 @@ if ($gim_cmd eq "") {
         if ($arg{as_remote} ne "") {
             msg("starting PsN (".$psn_cmd.")", $arg{as_remote});
 #    	    print ('nohup nice '.$psn_cmd.' > foo.out 2> foo.err < /dev/null &');
-    	    system ('nohup nice '.$psn_cmd.' > foo.out 2> foo.err < /dev/null &');
+	    my $cmd = 'nohup nice '.$psn_cmd.' > foo.out 2> foo.err < /dev/null &';
+	    system ($cmd);
+	    # run \@cmd, timeout( 5 )
+	    # 	or die "cat: $?";    	    
     	    sleep (1);
         } else {
             open (OUT, $psn_cmd . " | ");
@@ -447,11 +451,25 @@ if ($gim_cmd eq "") {
 #        git init; git remote rm origin; git remote add origin '.$origin -> {origin}.'; git pull origin master; '.$psn_cmd.' &"
         my $cmd = '"cd '.$server -> {repository_location}.'; mkdir -p '.$repo.'; cd '.$repo.'; '.$server -> {gim_location}.'/gim -as_remote='.$server_id.' '.$psn_cmd.'"';
        # msg ($ssh_cmd ." ". $cmd);
-        open (OUT, $ssh_cmd ." ". $cmd . " | ");
-        while (my $line = <OUT>) {
-            print $line;
-            $out .= $line;
-        }
+
+	my $timeout = 40; # seconds
+	msg("connecting to remote server (".$server -> {url}.")", $arg{as_remote});
+	eval {
+	    local $SIG{ALRM} = sub { die "alarm\n" }; # NB: \n required
+	    alarm $timeout;
+	    open (OUT, $ssh_cmd ." ". $cmd . " | ");
+	    while (my $line = <OUT>) {
+		print $line;
+		$out .= $line;
+	    }
+	    alarm 0;
+	};
+	if ($@) {
+	    die unless $@ eq "alarm\n";   # propagate unexpected errors
+	    msg("timed out while connecting to server (".$server -> {url}.")", $arg{as_remote});
+	} else {
+	    # no timeout
+	}
         if($out =~ m/(changes pushed)|(git added)/gi) {
             msg("changes were found on the remote server, synchronizing local data...");
             git_pull($r, $arg{as_remote});
