@@ -1,4 +1,0 @@
-Can't load '/netapp/home/tabor/myperl/usr/local/lib64/perl5/auto/Math/Random/Random.so' for module Math::Random: /netapp/home/tabor/myperl/usr/local/lib64/perl5/auto/Math/Random/Random.so: wrong ELF class: ELFCLASS64 at /usr/lib/perl5/DynaLoader.pm line 200.
- at /netapp/home/tabor/bin/execute line 11
-Compilation failed in require at /netapp/home/tabor/bin/execute line 11.
-BEGIN failed--compilation aborted at /netapp/home/tabor/bin/execute line 11.
