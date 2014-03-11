@@ -122,6 +122,7 @@ if ($gim_cmd eq "servers") {
 }
 if ($gim_cmd eq "ps") {
     system (join (" ", @all_args));
+    exit;
 }
 if ($gim_cmd eq "tunnel") {
     my $user = $ENV{"USER"};
