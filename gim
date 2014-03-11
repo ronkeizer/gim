@@ -387,24 +387,26 @@ if ($gim_cmd ne "") {
 
 if ($gim_cmd eq "") {
     
-    ## add files to the repo if new results available
-    my $origin = git_get_origin ($r);
-    if ($origin -> {origin} eq "") {
-        if ($arg{as_remote} ne "") {
-            my $folder = fastgetcwd();
-            my @dirs = split(/\//, $folder);
-            my $repo_id = pop(@dirs);
-            git_add_origin($r, $git_remote, $repo_id, 0, $arg{as_remote});
-        } else {
-            msg("no remote repository specified yet for this project. Please use 'gim link [repo]'",$arg{as_remote} );
-            exit;
-        }
-    }
-    my $repo = extract_repo_id_from_url ($origin -> {origin});
+    my $origin; my $folder; my @dirs; my $repo_id; my $repo; my $mkdir;
+    unless ("qstat" ~~ @all_args || "ps" ~~ @all_args) {
+	## add files to the repo if new results available
+	$origin = git_get_origin ($r);
+	if ($origin -> {origin} eq "") {
+	    if ($arg{as_remote} ne "") {
+		$folder = fastgetcwd();
+		@dirs = split(/\//, $folder);
+		$repo_id = pop(@dirs);
+		git_add_origin($r, $git_remote, $repo_id, 0, $arg{as_remote});
+	    } else {
+		msg("no remote repository specified yet for this project. Please use 'gim link [repo]'",$arg{as_remote} );
+		exit;
+	    }
+	}
+	$repo = extract_repo_id_from_url ($origin -> {origin});
+	$mkdir = "; mkdir -p ".$repo." ";
 
 # RK: Should we do a pull? probably not, unless you also work in the cloud. Make setting for this.
 #    git_pull ($r, $arg{as_remote});
-    unless ("qstat" ~~ @all_args || "ps" ~~ @all_args) {
     	if ($arg{as_remote} eq "") {
 	       git_add_commit ($r, $arg{as_remote});
 	       my $status = git_get_status($r, $arg{as_remote});
@@ -464,7 +466,7 @@ if ($gim_cmd eq "") {
         # my $ssh_sh = 'echo \#\!\/bin/sh > ssh.sh; echo exec /usr/bin/ssh -o StrictHostKeyChecking=no "\$@" >> ssh.sh';
         # my $ssh_env = 'export GIT_SSH=\"/root/test/ssh.sh\"';
 #        git init; git remote rm origin; git remote add origin '.$origin -> {origin}.'; git pull origin master; '.$psn_cmd.' &"
-        my $cmd = '"cd '.$server -> {repository_location}.'; mkdir -p '.$repo.'; cd '.$repo.'; '.$server -> {gim_location}.'/gim -as_remote='.$server_id.' '.$psn_cmd.'"';
+        my $cmd = '"cd '.$server -> {repository_location}.' '.$mkdir.'; cd '.$repo.'; '.$server -> {gim_location}.'/gim -as_remote='.$server_id.' '.$psn_cmd.'"';
        # msg ($ssh_cmd ." ". $cmd);
 
 	my $timeout = 40; # seconds
