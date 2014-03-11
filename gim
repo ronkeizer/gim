@@ -43,7 +43,7 @@ if ($key eq "help") {
 }
 my @gim_args = qw/as_remote cmd_prefix force/;
 my @sge_cmds = qw/qstat qhost/;
-my @gim_cmds = qw/init clone sync status link setup servers tunnel/;
+my @gim_cmds = qw/init clone sync status link setup servers tunnel ps/;
 push (@gim_cmds, @sge_cmds);
 my @psn_cmds = qw/do_psn execute bootstrap vpc llp/;
 my @all_cmd;
@@ -119,6 +119,9 @@ if ($gim_cmd eq "servers") {
         print $_."\n";
     }
     exit;
+}
+if ($gim_cmd eq "ps") {
+    system (join (" ", @all_args));
 }
 if ($gim_cmd eq "tunnel") {
     my $user = $ENV{"USER"};

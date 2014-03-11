@@ -79,7 +79,47 @@ Requirements
 
 Installation guide
 ------------------
-Follows soon....
+
+### Installation 
+
+Gim needs to be installed both on your local machine and on the
+servers you want to connect to. Obviously, you will need to have Perl
+and git installed, which is probably already the case.
+
+To install `gim`, first clone the Git repository, and create a
+symbolic link, e.g.:
+
+    cd ~/git
+    git clone git@github.com:ronkeizer/gim.git
+    sudo ln -s /usr/bin/gim ~/git/gim
+
+Next, a few Perl modules need to be installed:
+
+    sudo cpan -i Git::Repository
+    sudo cpan -i Capture::Tiny
+    sudo cpan -i JSON:PP
+
+After this, you should be able to run `gim` from the command line. If
+you receive an error message that a certain Perl module cannot be
+found, you will also have to install the reported module using `sudo
+cpan -i <module>`.
+
+### Configuration
+
+You should now run:
+
+    gim setup
+
+This will create a settings file for `gim` (located in
+`~/.gim/settings.json`. It will open this file in an editor so you can
+make changes and configure your system. The configuration file should
+be fairly straightforward. Just make sure the file is still in valid
+JSON format! On the local machine you will need to define the
+servers. On the remote servers you will only need to define the github
+user accounts.
+
+- add id_rsa.pub from local machine to remote server
+
 
 License
 -------
