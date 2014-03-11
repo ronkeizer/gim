@@ -124,7 +124,14 @@ if ($gim_cmd eq "ps") {
     if (int(@all_args) > 1) {
 	system (join (" ", @all_args));
     } else {
-	system ('ps ux | grep -E "(nonmem|f951|execute|bootstrap|vpc|llp|npc|randtest|cdd|scm|lasso|mcmp)"');
+	open (OUT, 'ps ux | grep -E "(nonmem|f951|execute|bootstrap|vpc|llp|npc|randtest|cdd|scm|lasso|mcmp)" |');
+	while (my $line = <OUT>) {
+	    chomp($line);
+	    unless ($line =~ m/grep \-E/) {
+		print $line . "\n";
+	    }
+	}
+	close OUT;
     }
     exit;
 }
